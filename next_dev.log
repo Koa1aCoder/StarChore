@@ -1,0 +1,13 @@
+nohup: ignoring input
+
+> starchore@0.1.0 dev
+> next dev --hostname 0.0.0.0
+
+▲ Next.js 16.3.1 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://0.0.0.0:3000
+✓ Ready in 321ms
+✓ Running next.config.ts took 32ms
+
+ GET / 200 in 427ms (next.js: 194ms, application-code: 233ms)
+ HEAD / 200 in 44ms (next.js: 3ms, application-code: 42ms)
