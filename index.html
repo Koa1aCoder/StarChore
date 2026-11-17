@@ -1,0 +1,1446 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fff9ef">
+  <title>Little Ladle — A kitchen adventure</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #25352e;
+      --muted: #748078;
+      --paper: #fff9ef;
+      --white: #fffefa;
+      --line: #e9e3d8;
+      --green: #245c48;
+      --green-light: #e9f2e9;
+      --tomato: #e7684f;
+      --yellow: #f2c65a;
+      --shadow: 0 14px 36px rgb(52 62 48 / 8%);
+      font-family: "DM Sans", sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; min-height: 100vh; }
+    button, input, select { font: inherit; color: inherit; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #e59a32; outline-offset: 3px; }
+    .shell { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar { display: flex; flex-direction: column; padding: 27px 18px 20px; border-right: 1px solid var(--line); background: #fffdf8; }
+    .brand { display: flex; align-items: center; gap: 11px; margin: 0 0 42px 7px; color: var(--ink); text-decoration: none; }
+    .brand-mark { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 13px; background: var(--green); color: white; font-size: 22px; }
+    .brand-name { font: 700 21px "Fraunces", Georgia, serif; }
+    .nav-label { margin: 0 0 9px 11px; color: #949a91; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+    .nav-list { display: grid; gap: 5px; max-height: 60vh; overflow-y: auto; }
+    .nav-button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 12px; border: 0; border-radius: 9px; background: transparent; color: #68746d; text-align: left; cursor: pointer; }
+    .nav-button:hover { background: #f5f2e9; }
+    .nav-button[aria-current="page"] { background: var(--green-light); color: var(--green); font-weight: 700; }
+    .nav-icon { display: grid; width: 22px; place-items: center; font-size: 17px; }
+    .sidebar-spacer { flex: 1; min-height: 30px; }
+    .level-box { padding: 15px; border: 1px solid #e9e3d8; border-radius: 10px; background: #fffaf0; }
+    .level-top { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 12px; font-weight: 700; }
+    .level-top span:last-child { color: var(--muted); font-size: 11px; }
+    .level-track, .progress-track { height: 7px; overflow: hidden; border-radius: 99px; background: #e8e7dc; }
+    .level-fill, .progress-fill { height: 100%; border-radius: inherit; background: var(--tomato); transition: width 250ms ease; }
+    .level-caption { margin: 9px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .sidebar-foot { margin: 17px 0 0 5px; color: #9a9f97; font-size: 11px; }
+    .main { min-width: 0; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; min-height: 78px; padding: 0 42px; border-bottom: 1px solid var(--line); background: rgb(255 254 250 / 75%); }
+    .crumb { color: var(--muted); font-size: 13px; }
+    .topbar-right { display: flex; align-items: center; gap: 19px; }
+    .star-count { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 800; }
+    .star-icon { color: #d7a429; font-size: 18px; }
+    .avatar { display: grid; width: 35px; height: 35px; place-items: center; border: 2px solid white; border-radius: 50%; background: #f4d8c6; box-shadow: 0 0 0 1px var(--line); font-size: 18px; }
+    .content { width: min(1120px, 100%); margin: 0 auto; padding: 35px 42px 56px; }
+    .eyebrow { margin: 0 0 8px; color: var(--tomato); font-size: 11px; font-weight: 800; text-transform: uppercase; }
+    h1, h2, h3 { margin-top: 0; font-family: "Fraunces", Georgia, serif; }
+    h1 { margin-bottom: 8px; font-size: clamp(30px, 4vw, 42px); line-height: 1.1; }
+    .intro { margin-bottom: 27px; color: var(--muted); font-size: 14px; }
+    .feature { display: grid; grid-template-columns: 1.05fr .95fr; min-height: 290px; overflow: hidden; border-radius: 12px; background: #245c48; box-shadow: var(--shadow); color: white; }
+    .feature-copy { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 34px 38px; }
+    .feature .eyebrow { color: #f2d074; }
+    .feature h2 { max-width: 390px; margin: 0 0 10px; font-size: clamp(28px, 3vw, 37px); line-height: 1.09; }
+    .feature-copy > p:not(.eyebrow) { max-width: 350px; margin: 0 0 20px; color: #deebe2; font-size: 13px; line-height: 1.65; }
+    .feature-meta { display: flex; flex-wrap: wrap; gap: 15px; margin: 0 0 23px; color: #e8efe7; font-size: 12px; }
+    .primary-button, .secondary-button { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 0 17px; border: 0; border-radius: 7px; font-size: 13px; font-weight: 800; cursor: pointer; transition: transform 150ms ease, background 150ms ease; }
+    .primary-button { background: var(--yellow); color: #263b30; }
+    .primary-button:hover { transform: translateY(-1px); background: #ffda70; }
+    .secondary-button { border: 1px solid var(--line); background: var(--white); }
+    .secondary-button:hover { background: #f5f2e9; }
+    .feature-photo { min-height: 290px; background-position: center; background-size: cover; }
+    .section-heading { display: flex; align-items: end; justify-content: space-between; margin: 33px 0 15px; }
+    .section-heading h2 { margin: 0; font-size: 23px; }
+    .text-button { padding: 4px 0; border: 0; background: transparent; color: var(--green); font-size: 12px; font-weight: 800; cursor: pointer; }
+    .recipe-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; }
+    .recipe-card { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: var(--white); transition: transform 150ms ease, box-shadow 150ms ease; }
+    .recipe-card:not(.locked):hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+    .recipe-card-photo { position: relative; height: 128px; background-position: center; background-size: cover; }
+    .recipe-card-photo::after { position: absolute; inset: 45% 0 0; background: linear-gradient(transparent, rgb(29 38 31 / 26%)); content: ""; }
+    .recipe-card-body { padding: 13px 14px 15px; }
+    .recipe-card h3 { margin: 0 0 5px; font-size: 16px; }
+    .recipe-card p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .card-meta { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; color: #68746d; font-size: 10px; font-weight: 700; }
+    .locked { filter: saturate(.58); }
+    .screen-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+    .screen-heading h1 { margin-bottom: 5px; }
+    .screen-heading p:not(.eyebrow) { margin: 0; color: var(--muted); font-size: 13px; }
+    .book-tools { display: grid; grid-template-columns: minmax(190px, 1fr) 190px 190px; gap: 10px; margin-bottom: 19px; }
+    .search-wrap { position: relative; }
+    .search-wrap span { position: absolute; top: 10px; left: 12px; color: var(--muted); }
+    .book-tools input, .book-tools select { width: 100%; height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--white); font-size: 12px; }
+    .book-tools input { padding-left: 35px; }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
+    .filter-button { min-height: 31px; padding: 0 11px; border: 1px solid var(--line); border-radius: 99px; background: var(--white); color: #657067; font-size: 11px; font-weight: 700; cursor: pointer; }
+    .filter-button[aria-pressed="true"] { border-color: var(--green); background: var(--green); color: white; }
+    .result-count { margin: 0 0 12px; color: var(--muted); font-size: 11px; }
+    .book-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
+    .book-card { overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: var(--white); }
+    .book-card .recipe-card-photo { height: 120px; }
+    .book-card-body { padding: 13px; }
+    .book-card h2 { min-height: 38px; margin: 0 0 5px; font-size: 16px; line-height: 1.2; }
+    .book-card p { min-height: 18px; margin: 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .book-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; }
+    .book-footer span { color: #657067; font-size: 10px; font-weight: 700; }
+    .book-footer .primary-button, .book-footer .secondary-button { min-height: 31px; padding: 0 9px; font-size: 10px; }
+    .book-footer .locked-label { color: #956c0f; }
+    .recipe-tools { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 11px; }
+    .favorite-button { display: inline-flex; align-items: center; gap: 6px; min-height: 31px; padding: 0 9px; border: 1px solid var(--line); border-radius: 7px; background: var(--white); color: #68746d; font-size: 11px; font-weight: 700; cursor: pointer; }
+    .favorite-button[aria-pressed="true"] { border-color: #e8c86d; background: #fff7dc; color: #80621a; }
+    .recipe-notes { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+    .recipe-notes summary { color: var(--green); font-size: 11px; font-weight: 700; cursor: pointer; }
+    .recipe-notes textarea { width: 100%; min-height: 66px; margin-top: 8px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; resize: vertical; font: inherit; font-size: 11px; }
+    .recipe-notes select { width: 100%; height: 33px; margin-top: 7px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: white; font-size: 11px; }
+    .create-recipe-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; max-width: 760px; }
+    .create-recipe-form .field-label { font-size: 12px; }
+    .create-recipe-form textarea { min-height: 95px; padding: 10px; border: 1px solid var(--line); border-radius: 7px; font: inherit; font-size: 13px; }
+    .create-recipe-form .wide { grid-column: 1 / -1; }
+    .no-results { grid-column: 1 / -1; padding: 45px 20px; border: 1px dashed var(--line); border-radius: 9px; color: var(--muted); text-align: center; font-size: 13px; }
+    .settings-section { margin-bottom: 29px; }
+    .settings-section h2 { margin: 0 0 6px; font-size: 21px; }
+    .settings-section > p { margin: 0 0 17px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .profile-form { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(150px, .7fr) auto; align-items: end; gap: 12px; padding: 18px 0 22px; border-bottom: 1px solid var(--line); }
+    .field-label { display: grid; gap: 7px; color: #59665e; font-size: 11px; font-weight: 700; }
+    .field-label input, .field-label select { width: 100%; height: 40px; padding: 0 11px; border: 1px solid var(--line); border-radius: 7px; background: var(--white); font-size: 13px; }
+    .settings-list { border-top: 1px solid var(--line); }
+    .setting-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 72px; border-bottom: 1px solid var(--line); }
+    .setting-copy strong { display: block; margin-bottom: 4px; font-size: 13px; }
+    .setting-copy span { display: block; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .switch { position: relative; display: inline-flex; flex: 0 0 44px; height: 25px; cursor: pointer; }
+    .switch input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .switch-track { width: 44px; height: 25px; border-radius: 99px; background: #d5d9d3; transition: background 150ms ease; }
+    .switch-track::after { position: absolute; top: 3px; left: 3px; width: 19px; height: 19px; border-radius: 50%; background: white; box-shadow: 0 1px 3px #0002; content: ""; transition: transform 150ms ease; }
+    .switch input:checked + .switch-track { background: var(--green); }
+    .switch input:checked + .switch-track::after { transform: translateX(19px); }
+    .switch input:focus-visible + .switch-track { outline: 3px solid #e59a32; outline-offset: 3px; }
+    .danger-zone { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 14px; }
+    .danger-zone p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .danger-button { min-height: 38px; padding: 0 13px; border: 1px solid #e6aaa0; border-radius: 7px; background: #fffefa; color: #a33e32; font-size: 11px; font-weight: 800; cursor: pointer; }
+    .danger-button:hover { background: #fff0ec; }
+    html.large-text .content :is(p, .setting-copy strong, .setting-copy span, .cook-prompt, .cook-feedback, .choice-text, .ingredient-name, .learn-panel > p, .recipe-fact, .screen-heading p, .intro, .recipe-card p, .book-card p) { font-size: 1.12em; }
+    html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    html.no-tips .learn-panel { display: none; }
+    html.no-tips .cook-layout { grid-template-columns: minmax(0, 1fr); }
+    .cook-layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(235px, .75fr); align-items: start; gap: 19px; }
+    .cook-panel, .learn-panel { border: 1px solid var(--line); border-radius: 10px; background: var(--white); }
+    .cook-panel { overflow: hidden; }
+    .cook-image { height: 170px; background-position: center 53%; background-size: cover; }
+    .cook-body { padding: 23px 25px 25px; }
+    .stage-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 22px; }
+    .stage-label { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .stage-dots { display: flex; gap: 5px; }
+    .stage-dot { width: 20px; height: 5px; border-radius: 20px; background: #e6e5db; }
+    .stage-dot.done { background: var(--green); }
+    .stage-dot.current { background: var(--tomato); }
+    .cook-body h2 { margin: 0 0 7px; font-size: 23px; }
+    .cook-prompt { margin: 0 0 18px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .ingredient-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+    .ingredient-button { min-height: 82px; padding: 10px 6px; border: 1px solid var(--line); border-radius: 8px; background: #fffefa; cursor: pointer; }
+    .ingredient-button:hover:not(:disabled) { border-color: #9dbea4; background: #f4f8f1; }
+    .ingredient-button:disabled { cursor: default; opacity: .58; }
+    .ingredient-button.selected { border-color: #77a486; background: var(--green-light); }
+    .ingredient-emoji { display: block; margin-bottom: 6px; font-size: 23px; }
+    .ingredient-name { display: block; font-size: 11px; font-weight: 700; }
+    .cook-feedback { min-height: 38px; margin: 12px 0 2px; color: var(--green); font-size: 12px; line-height: 1.5; }
+    .step-number { display: inline-grid; width: 25px; height: 25px; margin-right: 6px; place-items: center; border-radius: 50%; background: #fff1d2; color: #80621a; font-size: 11px; font-weight: 800; vertical-align: middle; }
+    .choice-list { display: grid; gap: 9px; }
+    .choice-button { display: flex; align-items: center; gap: 11px; width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); text-align: left; cursor: pointer; }
+    .choice-button:hover:not(:disabled) { border-color: #9dbea4; background: #f4f8f1; }
+    .choice-button:disabled { cursor: default; }
+    .choice-button.correct { border-color: #8eb29b; background: var(--green-light); }
+    .choice-button.incorrect { border-color: #e6aaa0; background: #fff0ec; }
+    .choice-letter { display: grid; flex: 0 0 27px; height: 27px; place-items: center; border-radius: 50%; background: #f4f1e9; color: #657067; font-size: 11px; font-weight: 800; }
+    .choice-text { font-size: 12px; line-height: 1.45; }
+    .action-row { display: flex; justify-content: flex-end; margin-top: 15px; }
+    .learn-panel { padding: 20px; }
+    .learn-top { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+    .learn-icon { display: grid; width: 37px; height: 37px; place-items: center; border-radius: 10px; background: #fff1d2; font-size: 18px; }
+    .learn-top h3 { margin: 0; font-size: 16px; }
+    .learn-panel > p { margin: 0; color: #657067; font-size: 12px; line-height: 1.7; }
+    .learn-divider { height: 1px; margin: 17px 0; background: var(--line); }
+    .recipe-facts { display: grid; gap: 12px; }
+    .recipe-fact { display: flex; justify-content: space-between; gap: 12px; color: #657067; font-size: 11px; }
+    .recipe-fact strong { color: var(--ink); text-align: right; }
+    .safety-note { margin-top: 15px; padding: 11px; border-radius: 7px; background: #fff5df; color: #725d31; font-size: 10px; line-height: 1.55; }
+    .celebration { padding: 13px 0 6px; text-align: center; }
+    .celebration-icon { display: inline-grid; width: 64px; height: 64px; margin-bottom: 12px; place-items: center; border-radius: 50%; background: #fff1d2; font-size: 30px; }
+    .celebration h2 { margin: 0 0 8px; font-size: 28px; }
+    .celebration p { max-width: 350px; margin: 0 auto 17px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .reward { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 20px; color: #956c0f; font-size: 14px; font-weight: 800; }
+    .toast { position: fixed; right: 24px; bottom: 24px; z-index: 5; max-width: min(350px, calc(100vw - 32px)); padding: 13px 16px; border-radius: 8px; background: #263b30; box-shadow: var(--shadow); color: white; font-size: 12px; line-height: 1.5; animation: appear 180ms ease-out; }
+    .primary-button:disabled, .secondary-button:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    .action-row.split { justify-content: space-between; }
+    .check-list, .sheet-ingredients, .sheet-steps { margin: 0; padding: 0; list-style: none; }
+    .check-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 8px; background: var(--white); cursor: pointer; }
+    .check-item.checked { border-color: #8eb29b; background: var(--green-light); }
+    .check-item.checked .check-name { text-decoration: line-through; color: var(--muted); }
+    .check-item input { width: 18px; height: 18px; accent-color: var(--green); }
+    .check-amount { min-width: 92px; font-size: 13px; font-weight: 800; color: var(--green); }
+    .check-name { font-size: 13px; }
+    .cook-progress { margin: 0 0 22px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--white); }
+    .cook-progress-text { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 9px; font-size: 12px; }
+    .cook-progress-text span { color: var(--muted); }
+    .cook-progress .progress-track { height: 10px; }
+    .step-text { margin: 0 0 22px; font-size: 17px; line-height: 1.65; }
+    .recipe-sheet { padding: 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--white); }
+    .recipe-sheet h3 { margin: 0 0 10px; font-size: 16px; }
+    .sheet-ingredients { margin-bottom: 20px; }
+    .sheet-ingredients li { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
+    .sheet-amount { flex: 0 0 96px; font-weight: 800; color: var(--green); }
+    .sheet-steps { counter-reset: s; }
+    .sheet-steps li { counter-increment: s; position: relative; padding: 0 0 12px 30px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .sheet-steps li::before { content: counter(s); position: absolute; left: 0; top: 0; display: grid; width: 21px; height: 21px; place-items: center; border-radius: 50%; background: #f0ede4; font-size: 10px; font-weight: 800; }
+    .sheet-steps li.current { color: var(--ink); font-weight: 600; }
+    .sheet-steps li.current::before { background: var(--tomato); color: white; }
+    .sheet-steps li.done::before { background: var(--green); color: white; }
+    .chef-wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; max-width: 760px; }
+    .chef-head { display: flex; align-items: center; gap: 14px; }
+    .chef-face { display: grid; width: 64px; height: 64px; place-items: center; border-radius: 50%; background: #fff1d2; font-size: 36px; }
+    .chef-note { margin: 2px 0 0; color: var(--muted); font-size: 11px; }
+    .chat-log { display: grid; gap: 12px; max-height: 460px; overflow-y: auto; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--white); }
+    .bubble { max-width: 88%; padding: 11px 14px; border-radius: 12px; font-size: 13px; line-height: 1.6; white-space: pre-line; }
+    .bubble.chef { justify-self: start; background: var(--green-light); }
+    .bubble.you { justify-self: end; background: #fff1d2; }
+    .chat-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+    .chat-card { overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: var(--white); }
+    .chat-card .recipe-card-photo { height: 100px; }
+    .chat-card-body { padding: 10px 12px 12px; }
+    .chat-card h4 { margin: 0 0 6px; font-family: "Fraunces", Georgia, serif; font-size: 15px; }
+    .chat-card ul { margin: 0 0 10px; padding-left: 16px; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .chat-card .primary-button { min-height: 32px; width: 100%; font-size: 11px; }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { padding: 7px 12px; border: 1px solid var(--line); border-radius: 99px; background: var(--white); font-size: 12px; cursor: pointer; }
+    .chip:hover { background: #f5f2e9; }
+    .chat-form { display: flex; gap: 8px; }
+    .chat-form input { flex: 1; height: 42px; padding: 0 13px; border: 1px solid var(--line); border-radius: 7px; background: var(--white); font-size: 13px; }
+    .streak-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border: 1px solid #ecd9a8; border-radius: 99px; background: #fff5df; font-size: 13px; font-weight: 800; cursor: pointer; }
+    .streak-card { margin-bottom: 29px; padding: 22px; border: 1px solid #ecd9a8; border-radius: 12px; background: #fffaf0; }
+    .streak-main { display: flex; align-items: center; gap: 14px; }
+    .streak-flame { font-size: 46px; line-height: 1; }
+    .streak-number { font: 700 44px/1 "Fraunces", Georgia, serif; }
+    .streak-label { color: var(--muted); font-size: 12px; font-weight: 700; }
+    .streak-message { margin: 14px 0 18px; font-size: 13px; line-height: 1.6; }
+    .streak-note { margin: 0 0 18px; color: #956c0f; font-size: 14px; font-weight: 800; }
+    .streak-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 16px; }
+    .streak-day { display: grid; justify-items: center; gap: 5px; color: var(--muted); font-size: 10px; font-weight: 700; }
+    .streak-dot { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; background: #efebdf; color: white; font-size: 14px; }
+    .streak-day.cooked .streak-dot { background: var(--tomato); }
+    .streak-day.today .streak-dot { outline: 2px solid var(--green); outline-offset: 2px; }
+    .streak-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-bottom: 14px; color: var(--muted); font-size: 12px; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .badge { padding: 5px 11px; border: 1px dashed #d6d2c4; border-radius: 99px; color: var(--muted); font-size: 11px; font-weight: 700; }
+    .badge.earned { border: 1px solid #e6c36a; background: #fff1d2; color: #80621a; }
+    .recipe-card, .book-card, .chat-card { position: relative; }
+    .heart-button { position: absolute; top: 8px; right: 8px; z-index: 2; display: grid; width: 34px; height: 34px; place-items: center; border: 0; border-radius: 50%; background: rgb(255 254 250 / 92%); box-shadow: 0 2px 8px rgb(0 0 0 / 14%); color: #8a8f87; font-size: 19px; line-height: 1; cursor: pointer; transition: transform 150ms ease; }
+    .heart-button:hover { transform: scale(1.08); }
+    .heart-button.on { color: var(--tomato); }
+    .shelf-empty { grid-column: 1 / -1; padding: 34px 20px; border: 1px dashed var(--line); border-radius: 9px; color: var(--muted); text-align: center; font-size: 13px; }
+    .card-cook { width: 100%; min-height: 30px; margin-top: 10px; font-size: 11px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
+    @keyframes appear { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 880px) {
+      .shell { grid-template-columns: 69px minmax(0, 1fr); }
+      .sidebar { align-items: center; padding: 20px 8px; }
+      .brand { margin: 0 0 35px; }
+      .brand-name, .nav-label, .nav-text, .level-box, .sidebar-foot { display: none; }
+      .nav-list { width: 100%; }
+      .nav-button { justify-content: center; padding: 12px 4px; }
+      .topbar { padding: 0 25px; }
+      .content { padding: 30px 25px 45px; }
+      .feature-copy { padding: 28px; }
+      .book-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .book-tools { grid-template-columns: minmax(150px, 1fr) 150px; }
+      .book-tools select:last-child { grid-column: 1 / -1; }
+    }
+    @media (max-width: 650px) {
+      .shell { display: block; padding-bottom: 65px; }
+      .sidebar { position: fixed; right: 0; bottom: 0; left: 0; z-index: 4; flex-direction: row; height: 60px; padding: 5px 16px; border-top: 1px solid var(--line); border-right: 0; background: #fffdf8; }
+      .brand, .sidebar-spacer { display: none; }
+      .nav-list { display: flex; width: 100%; max-height: none; justify-content: flex-start; gap: 8px; overflow-x: auto; }
+      .nav-button { flex: 0 0 48px; width: 48px; height: 48px; }
+      .profile-name { display: none; }
+      .topbar { min-height: 60px; padding: 0 17px; }
+      .topbar-right { gap: 13px; }
+      .content { padding: 25px 17px 33px; }
+      h1 { font-size: 32px; }
+      .feature { grid-template-columns: 1fr; }
+      .feature-copy { padding: 27px 24px; }
+      .feature-photo { min-height: 180px; grid-row: 1; }
+      .recipe-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .recipe-card-photo { height: 105px; }
+      .recipe-card-body { padding: 11px; }
+      .recipe-card h3 { font-size: 14px; }
+      .section-heading { margin-top: 26px; }
+      .cook-layout { grid-template-columns: 1fr; }
+      .cook-image { height: 145px; }
+      .cook-body { padding: 19px 16px; }
+      .learn-panel { padding: 17px; }
+      .screen-heading { align-items: flex-start; flex-direction: column; }
+      .book-tools { grid-template-columns: 1fr 1fr; }
+      .book-tools .search-wrap { grid-column: 1 / -1; }
+      .book-tools select:last-child { grid-column: auto; }
+      .book-grid { gap: 9px; }
+      .book-card .recipe-card-photo { height: 95px; }
+      .book-card-body { padding: 10px; }
+      .book-card h2 { min-height: 35px; font-size: 14px; }
+      .book-footer { align-items: flex-start; flex-direction: column; }
+      .book-footer .primary-button, .book-footer .secondary-button { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar" aria-label="Main navigation">
+      <a class="brand" href="#home" aria-label="Little Ladle home"><span class="brand-mark" aria-hidden="true">♨</span><span class="brand-name">little ladle</span></a>
+      <p class="nav-label">Your kitchen</p>
+      <nav class="nav-list" aria-label="Kitchen">
+        <button class="nav-button" data-screen="home" aria-current="page" aria-label="Kitchen home" title="Kitchen home"><span class="nav-icon" aria-hidden="true">⌂</span><span class="nav-text">Kitchen home</span></button>
+        <button class="nav-button" data-screen="book" aria-label="Recipe book" title="Recipe book"><span class="nav-icon" aria-hidden="true">▤</span><span class="nav-text">Recipe book</span></button>
+        <button class="nav-button" data-screen="explore" aria-label="Explore recipes" title="Explore recipes"><span class="nav-icon" aria-hidden="true">⌕</span><span class="nav-text">Explore recipes</span></button>
+        <button class="nav-button" data-screen="planner" aria-label="Meal planner" title="Meal planner"><span class="nav-icon" aria-hidden="true">▦</span><span class="nav-text">Meal planner</span></button>
+        <button class="nav-button" data-screen="shopping" aria-label="Shopping list" title="Shopping list"><span class="nav-icon" aria-hidden="true">☷</span><span class="nav-text">Shopping list</span></button>
+        <button class="nav-button" data-screen="academy" aria-label="Cooking academy" title="Cooking academy"><span class="nav-icon" aria-hidden="true">✎</span><span class="nav-text">Cooking academy</span></button>
+        <button class="nav-button" data-screen="challenges" aria-label="Challenges and rewards" title="Challenges and rewards"><span class="nav-icon" aria-hidden="true">✦</span><span class="nav-text">Challenges</span></button>
+        <button class="nav-button" data-screen="achievements" aria-label="Achievements" title="Achievements"><span class="nav-icon" aria-hidden="true">🏅</span><span class="nav-text">Achievements</span></button>
+        <button class="nav-button" data-screen="gallery" aria-label="Food gallery" title="Food gallery"><span class="nav-icon" aria-hidden="true">▧</span><span class="nav-text">My food gallery</span></button>
+        <button class="nav-button" data-screen="chef" aria-label="Chef AI" title="Chef AI"><span class="nav-icon" aria-hidden="true">✧</span><span class="nav-text">Chef AI</span></button>
+        <button class="nav-button" data-screen="around" aria-label="Around the world" title="Around the world"><span class="nav-icon" aria-hidden="true">◎</span><span class="nav-text">Around the world</span></button>
+        <button class="nav-button" data-screen="desserts" aria-label="Dessert studio" title="Dessert studio"><span class="nav-icon" aria-hidden="true">♡</span><span class="nav-text">Dessert studio</span></button>
+        <button class="nav-button" data-screen="profile" aria-label="Chef profile" title="Chef profile"><span class="nav-icon" aria-hidden="true">♙</span><span class="nav-text">My chef profile</span></button>
+        <button class="nav-button" data-screen="settings" aria-label="Settings and account" title="Settings and account"><span class="nav-icon" aria-hidden="true">⚙</span><span class="nav-text">Settings</span></button>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="level-box" aria-label="Kitchen level"><div class="level-top"><span>Kitchen level</span><span id="level-label">1</span></div><div class="level-track"><div class="level-fill" id="level-fill" style="width:0%"></div></div><p class="level-caption" id="level-caption">Cook a recipe to earn your first stars.</p></div>
+      <p class="sidebar-foot">Good food, happy hearts.</p>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div class="crumb" id="breadcrumb">Your kitchen <span aria-hidden="true">/</span> Today</div><div class="topbar-right"><button type="button" class="streak-chip" id="streak-chip" title="Daily cooking streak"><span aria-hidden="true">🔥</span><span id="streak-count">0</span></button><div class="star-count" aria-label="Stars earned"><span class="star-icon" aria-hidden="true">★</span><span id="star-count">0</span><span>stars</span></div><div class="profile-chip"><span class="profile-name" id="profile-name">Chef</span><div class="avatar" id="profile-avatar" aria-label="Chef profile" title="Chef profile">👩‍🍳</div></div></div></header>
+      <div class="content" id="app" aria-live="polite"></div>
+    </main>
+  </div>
+  <div class="sr-only" id="announcer" role="status" aria-live="polite"></div>
+  <script>
+    const groups = [
+      { category: "Breakfast", difficulty: "Easy", items: "Pancakes|Waffles|French Toast|Scrambled Eggs|Egg & Cheese Sandwich|Breakfast Burrito|Yogurt Parfait|Fruit & Granola Bowl|Banana Oatmeal|Blueberry Muffins|Banana Muffins|Cinnamon Toast|Peanut Butter Toast|Avocado Toast|Breakfast Quesadilla|Cheese Omelet|Strawberry Smoothie|Banana Smoothie|Berry Smoothie|Chocolate Chip Pancakes" },
+      { category: "Lunch", difficulty: "Easy", items: "Grilled Cheese|Turkey Sandwich|Ham & Cheese Sandwich|Chicken Wrap|Veggie Wrap|Tuna Sandwich|Pizza Toast|Mini Pizzas|Chicken Quesadilla|Cheese Quesadilla|Nachos|Mac & Cheese|Spaghetti|Butter Noodles|Chicken Pasta|Tomato Pasta|Cheese Ravioli|Pasta Salad|Chicken Salad|Taco Bowl" },
+      { category: "Dinner", difficulty: "Easy", items: "Tacos|Chicken Tacos|Beef Tacos|Chicken & Rice|Fried Rice|Chicken Fried Rice|Spaghetti & Meatballs|Baked Pasta|Cheese Pizza|Pepperoni Pizza|Chicken Pizza|Sloppy Joes|Mini Burgers|Cheeseburgers|Chicken Sandwich|Chicken Nuggets|Grilled Chicken & Rice|Loaded Baked Potato|Bean & Cheese Burrito|Vegetable Stir-Fry" },
+      { category: "Snacks", difficulty: "Easy", items: "Fruit Skewers|Apple Nachos|Ants on a Log|Trail Mix|Popcorn|Cheesy Popcorn|Cinnamon Apples|Banana Bites|Strawberry Yogurt Bites|Cheese & Crackers|Peanut Butter Banana Bites|Homemade Granola|Cucumber Sandwiches|Mini Caprese Skewers|Pretzel Bites|Pizza Rolls|Toasted Cheese Bites|Fruit Cups|Yogurt Cups|Chocolate-Dipped Strawberries" },
+      { category: "Desserts", difficulty: "Easy", items: "Chocolate Chip Cookies|Sugar Cookies|Brownies|Rice Krispie Treats|Chocolate Mug Cake|Vanilla Cupcakes|Chocolate Cupcakes|Strawberry Shortcake|Banana Bread|Cinnamon Rolls|No-Bake Cheesecake Cups|Ice Cream Sundae|Banana Split|Chocolate Pudding|Strawberry Parfait|Apple Crumble|S'mores|Chocolate-Covered Pretzels|Frozen Yogurt Bark|Mini Fruit Pizza 🍓" },
+      { category: "Hard", difficulty: "Hard", items: "Lasagna|Chicken Alfredo|Homemade Ravioli|Chicken Parmesan|Beef Wellington|Homemade Sushi|Chicken Pot Pie|Shrimp Fried Rice|Stuffed Shells|Enchiladas|Homemade Gnocchi|Chicken Tikka Masala|Beef & Vegetable Stir-Fry|Homemade Dumplings|Baked Ziti|Shepherd's Pie|Chicken Cordon Bleu|Homemade Pizza from Scratch|Three-Cheese Mac & Cheese|Stuffed Bell Peppers|Cheesecake|Chocolate Layer Cake|Red Velvet Cake|Strawberry Shortcake Cake|Cinnamon Roll Cake|Apple Pie|Chocolate Soufflé|Crème Brûlée|Tiramisu|Homemade Ice Cream" },
+      { category: "Extreme", difficulty: "Extreme", items: "Beef Wellington|Croquembouche|Homemade Ramen from Scratch|Homemade Sushi Platter|Lobster Ravioli|French Macarons|Multi-Layer Chocolate Cake|Classic Tiramisu|Homemade Gnocchi|Chicken Cordon Bleu|Chicken Tikka Masala|Handmade Dumplings|Homemade Lasagna|Seafood Paella|Homemade Empanadas|Stuffed Chicken Breast|Chicken Pot Pie From Scratch|Homemade Ravioli|Three-Course Italian Dinner|Three-Course French Dinner|Chocolate Soufflé|Crème Brûlée|New York Cheesecake|Red Velvet Layer Cake|Black Forest Cake|Strawberry Wedding Cake|Chocolate Opera Cake|Homemade Croissants|Giant Dessert Tower" }
+    ];
+    const extremeFourStar = new Set(["Classic Tiramisu", "Homemade Gnocchi", "Chicken Cordon Bleu", "Chicken Tikka Masala", "Handmade Dumplings", "Homemade Lasagna", "Homemade Empanadas", "Stuffed Chicken Breast", "Chicken Pot Pie From Scratch", "New York Cheesecake", "Red Velvet Layer Cake"]);
+    const recipes = groups.flatMap((group) => group.items.split("|").map((name) => ({
+      id: `${group.difficulty.toLowerCase()}-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
+      name,
+      category: group.category,
+      difficulty: group.difficulty,
+      rating: group.difficulty === "Extreme" ? (extremeFourStar.has(name) ? 4 : 5) : group.difficulty === "Hard" ? 3 : 1,
+      unlock: group.difficulty === "Extreme" ? 24 : group.difficulty === "Hard" ? 9 : 0,
+      time: group.difficulty === "Extreme" ? "60+ min" : group.difficulty === "Hard" ? "45+ min" : group.category === "Snacks" ? "10 min" : group.category === "Breakfast" ? "20 min" : "25 min"
+    })));
+    const storageKey = "little-ladle-progress-v2";
+    const preferencesKey = "little-ladle-preferences-v1";
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(storageKey) || "{}"); } catch {}
+    let savedPreferences = {};
+    try { savedPreferences = JSON.parse(localStorage.getItem(preferencesKey) || "{}"); } catch {}
+    const preferences = { showTips: true, largeText: false, reduceMotion: false, displayName: "Chef", avatar: "👩‍🍳", ...savedPreferences };
+    const state = { stars: Number(saved.stars) || 0, completed: Array.isArray(saved.completed) ? saved.completed : [], favorites: Array.isArray(saved.favorites) ? saved.favorites : [], personalRecipes: Array.isArray(saved.personalRecipes) ? saved.personalRecipes : [], notes: saved.notes && typeof saved.notes === "object" ? saved.notes : {}, ratings: saved.ratings && typeof saved.ratings === "object" ? saved.ratings : {}, plan: saved.plan && typeof saved.plan === "object" ? saved.plan : {}, shopping: Array.isArray(saved.shopping) ? saved.shopping : [], gallery: Array.isArray(saved.gallery) ? saved.gallery : [], challenges: saved.challenges && typeof saved.challenges === "object" ? saved.challenges : {}, cookedLog: Array.isArray(saved.cookedLog) ? saved.cookedLog : [], lessons: Array.isArray(saved.lessons) ? saved.lessons : [], showFavoritesOnly: false, screen: "home", recipeId: recipes[0].id, stage: "ingredients", picked: [], step: 0, answered: false, feedback: "", firstTry: true, category: "All", difficulty: "All", search: "", challengeType: "", challengeIngredient: "" };
+    recipes.push(...state.personalRecipes);
+    const app = document.querySelector("#app");
+    const announcer = document.querySelector("#announcer");
+    let toastTimer;
+
+    function recipeEmoji(recipe) {
+      const name = recipe.name.toLowerCase();
+      const art = [
+        [/pancake|waffle/, "🥞"], [/french toast|toast/, "🍞"], [/omelet|omelette|scrambled egg|egg &/, "🍳"], [/burrito|quesadilla|taco|enchilada|nacho|empanada/, "🌮"],
+        [/smoothie|yogurt|parfait/, "🥤"], [/oatmeal|granola/, "🥣"], [/muffin|cupcake/, "🧁"], [/grilled cheese|cheese sandwich|sandwich|wrap/, "🥪"], [/pizza/, "🍕"], [/pasta|spaghetti|ravioli|lasagna|gnocchi|ziti|mac & cheese|noodle/, "🍝"],
+        [/sushi/, "🍣"], [/ramen/, "🍜"], [/paella|rice/, "🍚"], [/beef wellington|steak|beef|burger|sloppy joes/, "🥩"], [/chicken|nugget/, "🍗"], [/stir-fry/, "🥘"], [/potato/, "🥔"],
+        [/cookie|macaron|pretzel/, "🍪"], [/brownie|chocolate|cocoa|pudding|soufflé|souffle/, "🍫"], [/cake|cheesecake|tiramisu|croquembouche/, "🍰"], [/pie|crumble/, "🥧"], [/ice cream|sundae|banana split|frozen yogurt/, "🍨"], [/cinnamon roll/, "🥐"],
+        [/fruit|apple|banana|strawberry|berry|skewer/, "🍓"], [/popcorn/, "🍿"], [/cracker|cheese/, "🧀"], [/salad|vegetable|veggie|cucumber|pepper/, "🥗"], [/s'mores|rice krispie/, "🍡"]
+      ];
+      return art.find(([pattern]) => pattern.test(name))?.[1] || ({ Breakfast: "🍳", Lunch: "🥪", Dinner: "🍲", Snacks: "🍿", Desserts: "🍰", Hard: "🍝", Extreme: "🍽️" }[recipe.category] || "🍽️");
+    }
+    function recipeImage(recipe) {
+      const palettes = { Breakfast: ["#f0c46c", "#fff0c9"], Lunch: ["#83a96b", "#e9efcb"], Dinner: ["#dc815d", "#f6dfbd"], Snacks: ["#78a88a", "#e6f0d7"], Desserts: ["#c77d87", "#f7dce0"], Hard: ["#789b91", "#dbe9d8"], Extreme: ["#8e819d", "#eee1d5"] };
+      const [color, light] = palettes[recipe.category] || palettes.Dinner;
+      let hash = 0;
+      for (const character of recipe.name) hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
+      const rotation = hash % 24 - 12;
+      const title = recipe.name.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600"><defs><linearGradient id="bg" x2="0" y2="1"><stop stop-color="${light}"/><stop offset="1" stop-color="${color}"/></linearGradient><pattern id="dots" width="34" height="34" patternUnits="userSpaceOnUse"><circle cx="5" cy="5" r="2" fill="#fff" opacity=".24"/></pattern></defs><rect width="900" height="600" fill="url(#bg)"/><rect width="900" height="600" fill="url(#dots)"/><circle cx="450" cy="279" r="218" fill="#284238" opacity=".13"/><circle cx="450" cy="264" r="210" fill="#fffdf5"/><circle cx="450" cy="264" r="183" fill="#f5f0e5"/><circle cx="450" cy="264" r="165" fill="#fffefa"/><g transform="rotate(${rotation} 450 260)"><text x="450" y="329" text-anchor="middle" font-size="196" font-family="Apple Color Emoji, Segoe UI Emoji, sans-serif">${recipeEmoji(recipe)}</text></g><rect x="90" y="490" width="720" height="66" rx="25" fill="#fffefa" opacity=".88"/><text x="450" y="534" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="27" font-weight="700" fill="#25352e">${title}</text></svg>`;
+      // Single quotes keep the url() safe inside a double-quoted style attribute.
+      return `background-image:url('data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg).replace(/'/g, "%27")}')`;
+    }
+    function esc(value) { return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+    function currentRecipe() { return recipes.find((recipe) => recipe.id === state.recipeId) || recipes[0]; }
+    function unlocked(recipe) { return state.stars >= recipe.unlock; }
+    function emptyStreak() { return { count: 0, best: 0, lastCookDate: "", days: [] }; }
+    function loadStreak(raw) {
+      const source = raw && typeof raw === "object" ? raw : {};
+      const valid = (key) => typeof key === "string" && /^\d{4}-\d{2}-\d{2}$/.test(key);
+      return { count: Math.max(0, Number(source.count) || 0), best: Math.max(0, Number(source.best) || 0), lastCookDate: valid(source.lastCookDate) ? source.lastCookDate : "", days: Array.isArray(source.days) ? source.days.filter(valid).slice(-60) : [] };
+    }
+    state.streak = loadStreak(saved.streak);
+    function dayKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`; }
+    // UTC day numbers keep the gap exact across daylight-saving changes.
+    function dayNumber(key) { const [year, month, day] = key.split("-").map(Number); return Math.round(Date.UTC(year, month - 1, day) / 86400000); }
+    function cookedToday(today = dayKey()) { return state.streak.lastCookDate === today; }
+    function currentStreak(today = dayKey()) {
+      if (!state.streak.lastCookDate) return 0;
+      return dayNumber(today) - dayNumber(state.streak.lastCookDate) <= 1 ? state.streak.count : 0;
+    }
+    function recordCook(today = dayKey()) {
+      const streak = state.streak;
+      if (streak.lastCookDate === today) return;
+      const gap = streak.lastCookDate ? dayNumber(today) - dayNumber(streak.lastCookDate) : Infinity;
+      if (gap < 0) return;
+      streak.count = gap === 1 ? streak.count + 1 : 1;
+      streak.best = Math.max(streak.best, streak.count);
+      streak.lastCookDate = today;
+      streak.days = [...streak.days, today].slice(-60);
+    }
+    function saveProgress() {
+      try { localStorage.setItem(storageKey, JSON.stringify({ stars: state.stars, streak: state.streak, completed: state.completed, favorites: state.favorites, personalRecipes: state.personalRecipes, notes: state.notes, ratings: state.ratings, plan: state.plan, shopping: state.shopping, gallery: state.gallery, challenges: state.challenges, cookedLog: state.cookedLog, lessons: state.lessons })); } catch {}
+      updateProgress();
+    }
+    function savePreferences() {
+      try { localStorage.setItem(preferencesKey, JSON.stringify(preferences)); } catch {}
+      applyPreferences();
+    }
+    function applyPreferences() {
+      document.documentElement.classList.toggle("large-text", preferences.largeText);
+      document.documentElement.classList.toggle("reduce-motion", preferences.reduceMotion);
+      document.documentElement.classList.toggle("no-tips", !preferences.showTips);
+      document.querySelector("#profile-name").textContent = preferences.displayName || "Chef";
+      document.querySelector("#profile-avatar").textContent = preferences.avatar || "👩‍🍳";
+      document.querySelector("#profile-avatar").setAttribute("aria-label", `${preferences.displayName || "Chef"} profile`);
+      document.querySelector("#profile-avatar").title = `${preferences.displayName || "Chef"} profile`;
+    }
+    function updateProgress() {
+      const streak = currentStreak();
+      document.querySelector("#streak-count").textContent = streak;
+      document.querySelector("#streak-chip").setAttribute("aria-label", `${streak}-day cooking streak. Open your profile.`);
+      document.querySelector("#star-count").textContent = state.stars;
+      document.querySelector("#level-label").textContent = Math.floor(state.stars / 3) + 1;
+      document.querySelector("#level-fill").style.width = `${(state.stars % 3) / 3 * 100}%`;
+      document.querySelector("#level-caption").textContent = state.stars % 3 === 2 ? "One more star to your next kitchen level!" : "Every new recipe brings a new kitchen skill.";
+    }
+    function notify(message) {
+      announcer.textContent = message;
+      document.querySelector(".toast")?.remove();
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.setAttribute("role", "status");
+      toast.textContent = message;
+      document.body.append(toast);
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.remove(), 3000);
+    }
+    function skillFor(recipe) {
+      if (recipe.difficulty === "Extreme") return "Advanced kitchen craft";
+      if (recipe.difficulty === "Hard") return "Build a recipe from scratch";
+      if (recipe.category === "Breakfast") return "Mixing & timing";
+      if (recipe.category === "Lunch") return "Layering & balancing";
+      if (recipe.category === "Dinner") return "Heat & doneness";
+      if (recipe.category === "Snacks") return "Prep & presentation";
+      return "Measuring & baking";
+    }
+    const measuredRecipes = {
+      "Pancakes": { servings: 4, ingredients: [["1½ cups", "all-purpose flour"], ["1 tablespoon", "sugar"], ["2 teaspoons", "baking powder"], ["¼ teaspoon", "salt"], ["1¼ cups", "milk"], ["1 large", "egg"], ["3 tablespoons", "melted butter"]], steps: ["Wash your hands. Whisk the flour, sugar, baking powder, and salt in a large bowl.", "In a second bowl, whisk the milk, egg, and melted butter. Pour into the dry ingredients and stir just until combined; a few small lumps are fine.", "With a grown-up, warm a lightly buttered skillet over medium heat. Pour about ¼ cup batter for each pancake.", "Cook until bubbles form and the edges look set, about 2 minutes. Flip once and cook until the other side is golden and the center is cooked through.", "Serve warm. Keep the skillet and spatula handles turned safely inward."] },
+      "Waffles": { servings: 4, ingredients: [["2 cups", "all-purpose flour"], ["1 tablespoon", "sugar"], ["1 tablespoon", "baking powder"], ["¼ teaspoon", "salt"], ["2 large", "eggs"], ["1¾ cups", "milk"], ["½ cup", "vegetable oil"]], steps: ["Whisk flour, sugar, baking powder, and salt in a bowl.", "Whisk eggs, milk, and oil in another bowl. Stir into the dry mixture just until no dry patches remain.", "Ask a grown-up to heat and lightly grease the waffle iron. Add batter without filling past the edges.", "Close the iron and cook until the steam slows and the waffle is golden. Let an adult remove it; the iron is very hot.", "Serve warm with fruit or yogurt."] },
+      "French Toast": { servings: 2, ingredients: [["4 slices", "thick bread"], ["2 large", "eggs"], ["½ cup", "milk"], ["½ teaspoon", "ground cinnamon"], ["1 teaspoon", "vanilla extract"], ["1 tablespoon", "butter"]], steps: ["Whisk eggs, milk, cinnamon, and vanilla in a shallow bowl.", "Dip each bread slice into the egg mixture, turning to coat both sides without soaking it until it falls apart.", "With a grown-up, melt butter in a skillet over medium heat. Add the coated bread in a single layer.", "Cook 2–3 minutes per side until golden and the center is no longer wet. Use a clean plate for the cooked slices.", "Serve warm. Refrigerate leftovers within 2 hours."] },
+      "Scrambled Eggs": { servings: 2, ingredients: [["4 large", "eggs"], ["2 tablespoons", "milk"], ["1 tablespoon", "butter"], ["⅛ teaspoon", "salt"]], steps: ["Crack the eggs into a bowl. Add milk and salt, then whisk until the yolks and whites are blended.", "Ask a grown-up to melt butter in a nonstick skillet over medium-low heat.", "Pour in the eggs. As they begin to set, gently push them across the pan with a spatula.", "Keep folding slowly until there is no runny egg left but the curds still look soft, about 3–5 minutes. An adult should check they are fully cooked.", "Turn off the heat and serve right away."] },
+      "Avocado Toast": { servings: 2, ingredients: [["2 slices", "whole-grain bread"], ["1 ripe", "avocado"], ["1 teaspoon", "lemon juice"], ["⅛ teaspoon", "salt"]], steps: ["Toast the bread until crisp. Ask a grown-up to help if using a hot toaster.", "Cut the avocado around its pit. Have an adult remove the pit; scoop the flesh into a bowl.", "Mash avocado with lemon juice and salt using a fork. Taste and adjust the seasoning.", "Spread the avocado over the toast and serve immediately."] },
+      "Grilled Cheese": { servings: 1, ingredients: [["2 slices", "sandwich bread"], ["2 slices", "cheddar cheese"], ["1 tablespoon", "softened butter"]], steps: ["Spread butter on one side of each bread slice. Place cheese between the unbuttered sides.", "With a grown-up, warm a skillet over medium-low heat. Put the sandwich in the pan.", "Cook until the bottom is golden, about 3 minutes. Flip carefully and cook until the second side is golden and the cheese has melted.", "Move to a plate and let it cool for 2 minutes before slicing; the cheese will be hot."] },
+      "Yogurt Parfait": { servings: 2, ingredients: [["1 cup", "plain or vanilla yogurt"], ["½ cup", "granola"], ["1 cup", "sliced strawberries"], ["1 teaspoon", "honey"]], steps: ["Rinse the strawberries under cool running water. Remove the green tops with a table knife or ask an adult to cut them.", "Spoon half the yogurt into each glass or bowl.", "Layer strawberries and granola over the yogurt. Repeat the layers once.", "Drizzle with honey and serve. Keep chilled until ready to eat."] },
+      "Banana Oatmeal": { servings: 2, ingredients: [["1 cup", "rolled oats"], ["2 cups", "milk or water"], ["1 ripe", "banana"], ["¼ teaspoon", "cinnamon"]], steps: ["With a grown-up, combine oats and milk or water in a small saucepan.", "Heat over medium-low, stirring often, until creamy and bubbling gently, about 5 minutes. Do not leave the pan unattended.", "Remove from heat. Slice the banana with a table knife and stir half into the oats.", "Spoon into bowls, top with the remaining banana and cinnamon, and let cool before eating."] },
+      "Strawberry Smoothie": { servings: 2, ingredients: [["1½ cups", "strawberries, fresh or frozen"], ["1", "banana"], ["¾ cup", "plain yogurt"], ["½ cup", "milk"]], steps: ["Rinse fresh strawberries and remove their green tops. Ask an adult to cut large berries in half.", "Put strawberries, banana, yogurt, and milk into a blender. Secure the lid before blending.", "Blend until smooth, stopping the blender before scraping down the sides.", "Pour into two glasses. Keep hands away from blender blades, even when unplugged."] },
+      "Mac & Cheese": { servings: 4, ingredients: [["8 ounces", "elbow macaroni"], ["2 tablespoons", "butter"], ["2 tablespoons", "all-purpose flour"], ["1½ cups", "milk"], ["2 cups", "shredded cheddar"], ["¼ teaspoon", "salt"]], steps: ["Ask a grown-up to bring a large pot of salted water to a boil. Add macaroni and cook according to the package, then drain carefully.", "While the pasta cooks, melt butter in a saucepan over medium-low heat. Stir in flour until smooth.", "Slowly whisk in milk. Stir until the sauce thickens and gently bubbles, about 4–5 minutes.", "Turn off the heat. Stir in cheddar and salt until melted, then mix in the drained macaroni.", "Let cool briefly before serving. A grown-up should handle the boiling water and hot pans."] },
+      "Spaghetti": { servings: 4, ingredients: [["12 ounces", "spaghetti"], ["2 cups", "marinara sauce"], ["1 tablespoon", "olive oil"], ["1 clove", "garlic, minced"], ["¼ cup", "grated Parmesan"]], steps: ["Ask a grown-up to bring a large pot of water to a boil. Add spaghetti and cook to the package directions, stirring occasionally.", "With an adult, warm olive oil in a saucepan over low heat. Add garlic and stir for 30 seconds; do not let it brown.", "Add marinara sauce. Simmer gently for 8–10 minutes, stirring now and then.", "Have an adult drain the pasta. Toss with the sauce and sprinkle with Parmesan.", "Turn off the stove and serve. Keep the pot handles turned inward."] },
+      "Tacos": { servings: 4, ingredients: [["8 small", "corn or flour tortillas"], ["1 pound", "ground beef or cooked beans"], ["2 tablespoons", "taco seasoning"], ["1 cup", "shredded lettuce"], ["½ cup", "shredded cheddar"], ["½ cup", "salsa"]], steps: ["Rinse and shred the lettuce. Set out cheese, salsa, and tortillas.", "With a grown-up, cook ground beef in a skillet over medium heat, breaking it up, until no pink remains and it reaches 160°F (71°C). For beans, warm them in a saucepan instead.", "Stir taco seasoning and ⅓ cup water into the cooked filling. Simmer until thickened, about 3 minutes.", "Warm tortillas according to the package. Spoon in filling and add lettuce, cheese, and salsa.", "Use separate utensils for raw meat and ready-to-eat toppings. Refrigerate leftovers promptly."] },
+      "Fried Rice": { servings: 4, ingredients: [["3 cups", "cold cooked rice"], ["2", "eggs"], ["1 cup", "frozen peas and carrots"], ["2 tablespoons", "soy sauce"], ["1 tablespoon", "neutral oil"]], steps: ["Use rice that was cooked, cooled quickly, and kept refrigerated. Beat the eggs in a small bowl.", "With a grown-up, heat oil in a large skillet over medium-high. Scramble the eggs until fully set, then transfer to a clean plate.", "Add peas and carrots to the skillet. Stir-fry until hot, about 3 minutes.", "Add cold rice and soy sauce. Stir and cook until steaming throughout, breaking up any clumps.", "Stir the cooked egg back in and serve immediately. Do not leave cooked rice at room temperature."] },
+      "Cheese Pizza": { servings: 4, ingredients: [["1 pound", "ready-made pizza dough"], ["½ cup", "pizza sauce"], ["1½ cups", "shredded mozzarella"], ["½ teaspoon", "dried oregano"]], steps: ["Ask a grown-up to preheat the oven to 475°F (245°C). Let the dough sit at room temperature for 20 minutes.", "On a lightly floured surface, stretch or roll the dough into a 12-inch round. Place it on a baking sheet.", "Spread sauce over the dough, leaving a 1-inch border. Sprinkle with mozzarella and oregano.", "With an adult, bake 10–14 minutes until the crust is golden and the cheese bubbles.", "Let the pizza cool for at least 5 minutes before an adult slices it. The pan and cheese are very hot."] },
+      "Chocolate Chip Cookies": { servings: 24, ingredients: [["2¼ cups", "all-purpose flour"], ["½ teaspoon", "baking soda"], ["1 cup", "softened butter"], ["¾ cup", "brown sugar"], ["½ cup", "granulated sugar"], ["1 large", "egg"], ["2 teaspoons", "vanilla extract"], ["1½ cups", "chocolate chips"]], steps: ["Ask a grown-up to preheat the oven to 350°F (175°C). Line two baking sheets with parchment.", "Whisk flour and baking soda in a bowl. In another bowl, beat butter and both sugars until creamy.", "Beat in egg and vanilla. Add the flour mixture and stir just until combined, then fold in chocolate chips.", "Drop rounded tablespoons of dough onto the sheets, leaving 2 inches between them. An adult should handle the oven.", "Bake 9–11 minutes until the edges are lightly golden. Cool on the sheet for 5 minutes; the centers finish setting as they cool."] },
+      "Brownies": { servings: 16, ingredients: [["½ cup", "melted butter"], ["1 cup", "granulated sugar"], ["2 large", "eggs"], ["1 teaspoon", "vanilla extract"], ["⅓ cup", "unsweetened cocoa powder"], ["½ cup", "all-purpose flour"], ["¼ teaspoon", "salt"]], steps: ["Ask a grown-up to heat the oven to 350°F (175°C) and grease an 8-inch square baking pan.", "Whisk melted butter and sugar in a bowl. Beat in eggs and vanilla until smooth.", "Stir in cocoa, flour, and salt just until no dry streaks remain. Spread the batter evenly in the pan.", "Bake with an adult's help for 20–25 minutes, until a toothpick in the center comes out with a few moist crumbs.", "Cool completely before cutting. The pan stays hot after leaving the oven."] }
+    };
+    function ingredient(amount, name) { return { amount, name }; }
+    function buildRecipeDetails(recipe) {
+      if (Array.isArray(recipe.customIngredients) && recipe.customIngredients.length) {
+        return { servings: "As written", ingredients: recipe.customIngredients.map((item) => ingredient("As needed", item)), steps: recipe.customInstructions || [] };
+      }
+      if (measuredRecipes[recipe.name]) {
+        const details = measuredRecipes[recipe.name];
+        return { ...details, ingredients: details.ingredients.map(([amount, name]) => ingredient(amount, name)) };
+      }
+      const name = recipe.name.toLowerCase();
+      let ingredients;
+      let steps;
+      if (/pizza toast/.test(name)) {
+        ingredients = [["2 slices", "bread"], ["¼ cup", "pizza sauce"], ["½ cup", "shredded mozzarella"], ["¼ cup", "mini pepperoni or diced bell pepper"]];
+        steps = ["Ask a grown-up to heat the oven or toaster oven to 400°F (200°C). Place the bread on a lined tray.", "Spread pizza sauce on each slice and add mozzarella and your topping.", "Bake with an adult's help for 6–8 minutes until the cheese is melted and the edges are crisp.", "Let cool for 2 minutes before eating."];
+      } else if (/blueberry muffins|banana muffins/.test(name)) {
+        const fruit = /blueberry/.test(name) ? "1 cup blueberries" : "1 cup mashed ripe banana";
+        ingredients = [["1½ cups", "all-purpose flour"], ["½ cup", "sugar"], ["1½ teaspoons", "baking powder"], ["1", "egg"], ["½ cup", "milk"], ["⅓ cup", "melted butter"], ["1 cup", fruit]];
+        steps = ["Ask a grown-up to heat the oven to 375°F (190°C) and line a 12-cup muffin pan.", "Whisk flour, sugar, and baking powder. In another bowl, whisk egg, milk, and melted butter.", "Pour wet ingredients into dry ingredients and stir just until combined. Gently fold in the blueberries or mashed banana.", "Divide batter among muffin cups. An adult should bake for 18–22 minutes, until a toothpick comes out clean.", "Cool in the pan for 5 minutes, then transfer to a rack with a grown-up's help."];
+      } else if (/sloppy joes/.test(name)) {
+        ingredients = [["1 pound", "ground beef or cooked lentils"], ["½ cup", "finely diced onion"], ["¾ cup", "tomato sauce"], ["2 tablespoons", "ketchup"], ["1 teaspoon", "yellow mustard"], ["4", "hamburger buns"]];
+        steps = ["With a grown-up, cook the beef and onion in a skillet over medium heat, breaking the beef apart, until no pink remains and it reaches 160°F (71°C). For lentils, sauté onion until soft and stir in cooked lentils.", "Stir in tomato sauce, ketchup, and mustard. Simmer gently for 8–10 minutes, stirring often.", "Spoon the hot filling onto the buns. Use separate utensils for raw meat and cooked food.", "Refrigerate leftovers within 2 hours."];
+      } else if (/loaded baked potato/.test(name)) {
+        ingredients = [["2 medium", "russet potatoes"], ["½ cup", "shredded cheddar"], ["¼ cup", "plain yogurt or sour cream"], ["2 tablespoons", "sliced green onion"], ["⅛ teaspoon", "salt"]];
+        steps = ["Scrub potatoes under running water and pat dry. Ask a grown-up to pierce each potato several times with a fork.", "An adult should bake them on a tray at 425°F (220°C) for 45–60 minutes, until a knife slides easily into the center.", "Let cool briefly. With adult help, split each potato and fluff the inside with a fork.", "Top with cheese, yogurt or sour cream, green onion, and salt. The potato centers are very hot."];
+      } else if (/vegetable stir-fry|beef & vegetable stir-fry/.test(name)) {
+        const protein = /beef/.test(name);
+        ingredients = [["2 cups", protein ? "thinly sliced beef" : "broccoli, bell pepper, and carrot"], ["2 cups", protein ? "sliced mixed vegetables" : "cooked rice"], ["1 tablespoon", "neutral oil"], ["2 tablespoons", "low-sodium soy sauce"], ["1 teaspoon", "cornstarch mixed with 2 tablespoons water"]];
+        steps = ["Wash and slice the vegetables into similar-sized pieces. If using beef, have an adult slice it thinly and keep it separate from produce.", "With a grown-up, heat oil in a wok or large skillet over high heat. Cook beef in a single layer until browned and 145°F (63°C) with a 3-minute rest; set aside. Skip this step for vegetable-only stir-fry.", "Stir-fry the vegetables for 3–5 minutes until crisp-tender. Return beef to the pan if using.", "Stir soy sauce and cornstarch mixture, pour into the pan, and cook until glossy and bubbling. Serve over rice."];
+      } else if (/ants on a log/.test(name)) {
+        ingredients = [["4 stalks", "celery"], ["¼ cup", "smooth peanut butter or seed butter"], ["¼ cup", "raisins"]];
+        steps = ["Wash celery and pat it dry. Ask an adult to cut each stalk into 3-inch pieces.", "Spread peanut butter or seed butter into the hollow side of each piece with a table knife.", "Press raisins into the spread to make the ants. Check for allergies before serving."];
+      } else if (/trail mix/.test(name)) {
+        ingredients = [["1 cup", "whole-grain cereal"], ["½ cup", "pretzels"], ["½ cup", "raisins or dried cranberries"], ["¼ cup", "chocolate chips or sunflower seeds"]];
+        steps = ["Check the ingredient labels for allergies, then measure each ingredient into a large bowl.", "Stir gently until evenly mixed.", "Portion into small containers. Keep covered in a cool, dry place."];
+      } else if (/cheesy popcorn|popcorn/.test(name)) {
+        ingredients = [["¼ cup", "unpopped popcorn kernels or 8 cups plain popped popcorn"], ["1 tablespoon", "melted butter or olive oil"], ["2 tablespoons", /cheesy/.test(name) ? "finely grated Parmesan" : "nutritional yeast, optional"], ["⅛ teaspoon", "salt"]];
+        steps = ["Ask a grown-up to pop the kernels using an air popper or covered pot. Never leave a hot pot unattended.", "Check for and discard any unpopped kernels.", "Drizzle the warm popcorn with butter or oil, sprinkle with cheese or nutritional yeast and salt, then toss carefully.", "Let cool slightly before serving; kernels can be very hot."];
+      } else if (/cheese & crackers/.test(name)) {
+        ingredients = [["1 cup", "whole-grain crackers"], ["4 ounces", "cheddar cheese"], ["1 cup", "washed grapes or apple slices"]];
+        steps = ["Wash the grapes or apple. Ask a grown-up to cut fruit into bite-size pieces.", "Cut the cheese into small slices with adult help.", "Arrange crackers, cheese, and fruit on a plate. Keep chilled until serving."];
+      } else if (/homemade granola/.test(name)) {
+        ingredients = [["3 cups", "rolled oats"], ["½ cup", "chopped nuts or seeds"], ["⅓ cup", "honey or maple syrup"], ["¼ cup", "neutral oil"], ["1 teaspoon", "cinnamon"]];
+        steps = ["Ask a grown-up to preheat the oven to 325°F (165°C) and line a rimmed baking sheet.", "Stir oats, nuts or seeds, honey, oil, and cinnamon in a bowl until coated.", "Spread in an even layer. An adult should bake for 20–25 minutes, stirring halfway, until lightly golden.", "Cool completely on the tray; granola crisps as it cools. Store in an airtight container."];
+      } else if (/pretzel bites/.test(name)) {
+        ingredients = [["1 pound", "refrigerated pizza dough"], ["4 cups", "water"], ["¼ cup", "baking soda"], ["1", "beaten egg"], ["1 teaspoon", "coarse salt"]];
+        steps = ["Ask a grown-up to heat the oven to 425°F (220°C) and line a baking sheet. Cut dough into 1-inch pieces with a table knife.", "An adult should bring water to a gentle boil and carefully stir in baking soda. Dip dough pieces for about 20 seconds, then lift them out with a slotted spoon.", "Arrange on the tray, brush with beaten egg, and sprinkle with salt.", "Bake with adult help for 12–15 minutes until deep golden. Cool before eating."];
+      } else if (/yogurt cups/.test(name)) {
+        ingredients = [["2 cups", "plain or vanilla yogurt"], ["1 cup", "washed, chopped fruit"], ["½ cup", "granola"], ["2 teaspoons", "honey, optional"]];
+        steps = ["Wash fruit under cool running water. Ask an adult to cut firm fruit into small pieces.", "Spoon yogurt into four small cups.", "Top each cup with fruit and granola. Drizzle with honey if desired.", "Refrigerate until ready to serve; add granola just before eating to keep it crisp."];
+      } else if (/chocolate-dipped strawberries/.test(name)) {
+        ingredients = [["1 pound", "strawberries with stems"], ["6 ounces", "semisweet chocolate, chopped"], ["1 teaspoon", "neutral oil, optional"]];
+        steps = ["Rinse strawberries and dry them completely; chocolate will not stick to wet berries.", "With a grown-up, melt chocolate in a heatproof bowl in 20-second microwave bursts, stirring each time. Stir in oil if using.", "Hold each berry by its stem and dip it into chocolate. Set on parchment paper.", "Refrigerate for 20 minutes until chocolate is firm. Keep chilled and eat within 2 days."];
+      } else if (/frozen yogurt bark/.test(name)) {
+        ingredients = [["2 cups", "plain Greek yogurt"], ["2 tablespoons", "honey or maple syrup"], ["1 cup", "washed berries"], ["¼ cup", "mini chocolate chips or granola"]];
+        steps = ["Stir yogurt and honey together. Line a rimmed tray that fits in the freezer with parchment.", "Spread yogurt about ¼ inch thick on the tray. Scatter berries and chocolate chips or granola over it.", "Freeze flat for at least 3 hours until completely firm.", "Break into pieces and serve immediately. Return leftovers to the freezer."];
+      } else if (/ice cream sundae|banana split/.test(name)) {
+        ingredients = [["4 scoops", "vanilla ice cream"], [/banana split/.test(name) ? "1" : "¼ cup", /banana split/.test(name) ? "banana, split lengthwise" : "chocolate sauce"], ["¼ cup", "sliced strawberries"], ["2 tablespoons", "whipped cream"], ["1 tablespoon", "chopped nuts or sprinkles, optional"]];
+        steps = ["Wash and slice the strawberries. Ask a grown-up to split the banana lengthwise if making a banana split.", "Place ice cream in chilled bowls or in the banana halves.", "Add fruit, chocolate sauce, whipped cream, and optional nuts or sprinkles.", "Serve right away. Check for nut allergies before adding nuts."];
+      } else if (/s'mores/.test(name)) {
+        ingredients = [["4", "graham crackers, halved"], ["2", "marshmallows"], ["2 squares", "milk chocolate"]];
+        steps = ["Place chocolate on two cracker halves and set aside the matching tops.", "Ask an adult to toast marshmallows using a safe kitchen method. Children should never handle an open flame.", "Place a hot marshmallow on each chocolate-topped cracker. Add the top cracker and press gently.", "Wait until the filling is cool enough to eat; melted marshmallow can burn."];
+      } else if (/chocolate-covered pretzels/.test(name)) {
+        ingredients = [["2 cups", "small pretzels"], ["6 ounces", "semisweet chocolate"], ["2 tablespoons", "colored sprinkles, optional"]];
+        steps = ["Line a tray with parchment paper.", "With a grown-up, melt chocolate in a heatproof bowl in 20-second microwave bursts, stirring between each burst.", "Dip each pretzel halfway into the chocolate and place it on the tray. Add sprinkles while the chocolate is wet.", "Refrigerate 15–20 minutes until set. Store in a covered container."];
+      } else if (/cinnamon rolls/.test(name)) {
+        ingredients = [["1 can", "refrigerated cinnamon roll dough"], ["1 tablespoon", "melted butter"], ["1 tablespoon", "brown sugar"], ["½ teaspoon", "ground cinnamon"], ["1 packet", "included icing"]];
+        steps = ["Ask a grown-up to preheat the oven to the temperature on the dough package and grease the pan.", "Arrange rolls in the pan with space between them. Brush with melted butter and sprinkle with brown sugar and cinnamon.", "An adult should bake according to the package directions until the centers are cooked through and the tops are golden.", "Cool for 5 minutes, then spread on the included icing. The pan and rolls are hot."];
+      } else if (/beef wellington/.test(name)) {
+        ingredients = [["1½ pounds", "beef tenderloin"], ["8 ounces", "finely chopped mushrooms"], ["1 sheet", "thawed puff pastry"], ["2 tablespoons", "Dijon mustard"], ["4 slices", "prosciutto"], ["1", "egg, beaten"]];
+        steps = ["This advanced recipe needs an adult. Pat beef dry, season it, and sear all sides in a hot skillet. Chill completely, then brush with mustard.", "Cook mushrooms in the skillet until their moisture evaporates. Cool fully. Arrange prosciutto on plastic wrap, spread mushrooms over it, and wrap the beef tightly. Chill 20 minutes.", "Wrap the chilled beef in puff pastry, seal the seam underneath, and brush pastry with beaten egg. Chill while an adult heats the oven to 400°F (200°C).", "An adult should bake until pastry is golden and a thermometer in the beef reaches the chosen safe doneness. Rest 10 minutes before slicing; hot trays and knives require adult handling."];
+      } else if (/homemade sushi/.test(name)) {
+        ingredients = [["1 cup", "sushi rice"], ["1¼ cups", "water"], ["2 tablespoons", "seasoned rice vinegar"], ["4 sheets", "nori"], ["1", "cucumber, cut into sticks"], ["1", "avocado, sliced"]];
+        steps = ["Rinse rice several times. Ask a grown-up to cook it with water according to the package. Stir in rice vinegar and cool until just warm.", "Place a nori sheet shiny-side down on a clean mat. With damp fingers, spread a thin layer of rice over it, leaving a 1-inch strip at the far edge.", "Lay cucumber and avocado in a line near the edge closest to you. Roll tightly using the mat; moisten the bare edge to seal.", "With an adult, cut the roll using a damp, sharp knife. Keep raw seafood out of this beginner version; serve with soy sauce if desired."];
+      } else if (/homemade ramen/.test(name)) {
+        ingredients = [["6 cups", "low-sodium chicken or vegetable broth"], ["8 ounces", "ramen noodles"], ["2 cups", "sliced mushrooms and bok choy"], ["2 tablespoons", "low-sodium soy sauce"], ["2", "eggs, optional"], ["2", "sliced green onions"]];
+        steps = ["Ask a grown-up to bring broth and soy sauce to a simmer in a large pot. Add mushrooms and cook until tender.", "Add noodles and cook according to the package directions. Stir in bok choy for the final 2 minutes.", "If adding eggs, an adult should cook them separately until both white and yolk are firm. Never add raw egg to the bowl.", "Divide noodles and broth into bowls. Top with cooked egg and green onion. The broth is very hot; let it cool before eating."];
+      } else if (/homemade dumplings|handmade dumplings/.test(name)) {
+        ingredients = [["24", "round dumpling wrappers"], ["8 ounces", "ground pork or crumbled firm tofu"], ["1 cup", "finely shredded cabbage"], ["1 tablespoon", "low-sodium soy sauce"], ["1 teaspoon", "grated ginger"], ["1 tablespoon", "neutral oil"]];
+        steps = ["Mix pork or tofu with cabbage, soy sauce, and ginger. If using raw pork, wash hands and keep the filling away from ready-to-eat food.", "Put 1 teaspoon filling in each wrapper. Wet the edge with water, fold in half, and pinch firmly to seal.", "With an adult, arrange dumplings in an oiled skillet and brown the bottoms. Carefully add ½ cup water and cover. Steam pork dumplings until the center reaches 160°F (71°C).", "Uncover only after an adult turns off the heat. Let steam escape away from your face and serve with dipping sauce."];
+      } else if (/stuffed shells/.test(name)) {
+        ingredients = [["20", "jumbo pasta shells"], ["15 ounces", "ricotta cheese"], ["1", "egg"], ["1½ cups", "shredded mozzarella"], ["2 cups", "marinara sauce"], ["¼ cup", "grated Parmesan"]];
+        steps = ["Ask a grown-up to heat the oven to 375°F (190°C). Cook shells in boiling water until just tender, then drain carefully and cool.", "Mix ricotta, egg, half the mozzarella, and Parmesan in a bowl.", "Spread 1 cup marinara in a baking dish. Fill each shell with the cheese mixture and arrange in the dish. Spoon remaining sauce over the top and add remaining mozzarella.", "Cover with foil. An adult should bake 25 minutes, then uncover and bake 10 minutes more until bubbling. Rest 10 minutes before serving."];
+      } else if (/three-cheese mac & cheese/.test(name)) {
+        ingredients = [["12 ounces", "elbow macaroni"], ["3 tablespoons", "butter"], ["3 tablespoons", "flour"], ["3 cups", "milk"], ["1½ cups", "cheddar"], ["1 cup", "mozzarella"], ["½ cup", "Parmesan"]];
+        steps = ["Ask a grown-up to cook macaroni in boiling water according to the package, then drain.", "Melt butter in a saucepan over medium-low heat. Stir in flour for 1 minute. Slowly whisk in milk and stir until thickened, about 5 minutes.", "Turn off the heat. Stir in cheddar, mozzarella, and Parmesan until melted and smooth.", "Fold in cooked macaroni. For a crisp top, transfer to a baking dish and ask an adult to broil briefly while watching closely.", "Let cool before serving. Hot sauce and dishes need adult handling."];
+      } else if (/stuffed bell peppers/.test(name)) {
+        ingredients = [["4", "bell peppers"], ["2 cups", "cooked rice"], ["1 pound", "cooked ground turkey or black beans"], ["1½ cups", "tomato sauce"], ["1 cup", "shredded mozzarella"]];
+        steps = ["Ask an adult to heat the oven to 375°F (190°C), cut off pepper tops, and remove seeds.", "Mix cooked rice, fully cooked ground turkey or beans, half the tomato sauce, and half the cheese.", "Fill peppers and stand them in a baking dish. Pour remaining sauce around them and cover with foil.", "An adult should bake 35 minutes. Uncover, add remaining cheese, and bake 10–15 minutes more until peppers are tender and filling is steaming.", "Rest 5 minutes before serving; peppers and filling are very hot."];
+      } else if (/crème brûlée/.test(name)) {
+        ingredients = [["2 cups", "heavy cream"], ["5 large", "egg yolks"], ["½ cup", "granulated sugar"], ["1 teaspoon", "vanilla extract"], ["4 teaspoons", "sugar for topping"]];
+        steps = ["An adult should heat the oven to 325°F (165°C) and warm cream until steaming, not boiling.", "Whisk egg yolks, sugar, and vanilla. Slowly whisk in warm cream a little at a time so the eggs do not scramble.", "Divide among four ramekins. An adult should place them in a deep pan, add hot water halfway up the sides, and bake 30–40 minutes until the edges set and centers wobble slightly.", "Cool, then refrigerate at least 4 hours. An adult should sprinkle sugar on top and caramelize it with a kitchen torch; children must not use a torch.", "Let the sugar crust cool before serving."];
+      } else if (/homemade ice cream/.test(name)) {
+        ingredients = [["2 cups", "heavy cream"], ["1 cup", "whole milk"], ["¾ cup", "sugar"], ["2 teaspoons", "vanilla extract"], ["⅛ teaspoon", "salt"]];
+        steps = ["Whisk milk, sugar, vanilla, and salt until the sugar dissolves. Stir in cream.", "Cover and chill the mixture in the refrigerator for at least 2 hours.", "Pour into an ice-cream maker and churn according to its instructions. An adult should operate the machine.", "For firmer scoops, transfer to a covered container and freeze 2–3 hours. Keep frozen between servings."];
+      } else if (/croquembouche/.test(name)) {
+        ingredients = [["1 cup", "water"], ["½ cup", "butter"], ["1 cup", "all-purpose flour"], ["4 large", "eggs"], ["2 cups", "whole milk"], ["½ cup", "sugar"], ["3 tablespoons", "cornstarch"], ["1 teaspoon", "vanilla"], ["1 cup", "sugar for caramel"]];
+        steps = ["This advanced French dessert requires an adult at every hot-stove and caramel step. First make pastry cream: whisk sugar, cornstarch, and egg yolks; slowly whisk in hot milk, then cook while stirring until thick. Stir in vanilla and chill completely.", "Ask an adult to heat oven to 400°F (200°C). Bring water and butter to a boil, stir in flour until a ball forms, then cool 5 minutes. Beat in eggs one at a time.", "Pipe small rounds onto lined trays. An adult should bake 20–25 minutes until puffed and golden, then cool completely.", "Fill cooled puffs with chilled pastry cream using a piping bag. Keep refrigerated while preparing the tower.", "An adult should melt sugar with a little water to a light amber caramel. Using tongs and extreme care, dip each puff and stack into a cone. Hot caramel causes serious burns; children must not touch or prepare it.", "Let caramel set, then serve the same day. Refrigerate any filled leftovers."];
+      } else if (/three-course italian dinner/.test(name)) {
+        ingredients = [["1", "small baguette"], ["2", "ripe tomatoes"], ["2 tablespoons", "olive oil"], ["12 ounces", "penne pasta"], ["2 cups", "marinara sauce"], ["1 cup", "grated Parmesan"], ["1 pint", "berries"], ["1 cup", "plain yogurt"]];
+        steps = ["Starter: wash and dice tomatoes. Spoon onto toasted baguette slices with olive oil. Ask an adult to help with the toaster and knife.", "Main: with a grown-up, boil penne according to the package and warm marinara in a separate saucepan. Drain pasta with adult help, toss with sauce, and top with Parmesan.", "Dessert: rinse berries and serve with yogurt. Keep dessert refrigerated until serving.", "Set out all three courses. Keep hot pasta separate from the cold dessert and refrigerate leftovers promptly."];
+      } else if (/three-course french dinner/.test(name)) {
+        ingredients = [["1", "baguette"], ["4 cups", "washed mixed greens"], ["2 tablespoons", "olive oil"], ["1 tablespoon", "lemon juice"], ["4", "boneless chicken thighs"], ["1 pound", "baby potatoes"], ["1 cup", "plain yogurt"], ["1 cup", "sliced strawberries"]];
+        steps = ["Starter: whisk olive oil and lemon juice. Toss with washed greens just before serving; slice baguette with adult help.", "Main: ask an adult to roast potatoes at 425°F (220°C) until tender. Cook chicken separately to 165°F (74°C) on a food thermometer; prevent raw chicken from touching salad or bread.", "Rest chicken for 3 minutes, then serve with potatoes and greens. An adult should handle knives and hot trays.", "Dessert: layer yogurt and strawberries in cups. Refrigerate until served.", "Serve courses in order and refrigerate leftovers within 2 hours."];
+      } else if (/giant dessert tower/.test(name)) {
+        ingredients = [["12", "mini cupcakes, fully cooled"], ["12", "chocolate-chip cookies"], ["8", "brownie squares, fully cooled"], ["2 cups", "thick buttercream frosting"], ["1 cup", "washed strawberries"]];
+        steps = ["Bake or buy the cupcakes, cookies, and brownies. If baking, follow their individual recipes and let everything cool completely before stacking.", "Wash and dry strawberries. Ask an adult to remove the stems and cut larger berries in half.", "Place a large, stable plate on a level surface. Spread a small amount of frosting on it to anchor the first layer of brownies.", "Stack brownies, cookies, and cupcakes in a wide-bottomed tower, using small dabs of frosting between layers. Keep the tower short and stable; do not climb or move it while assembled.", "Decorate with strawberries and serve immediately. Refrigerate leftovers; remove any non-food supports before eating."];
+      } else if (/pancake|waffle/.test(name)) {
+        ingredients = [["1½ cups", "flour"], ["1 tablespoon", "sugar"], ["2 teaspoons", "baking powder"], ["1", "egg"], ["1¼ cups", "milk"], ["2 tablespoons", "melted butter"], ["½ cup", /chocolate/.test(name) ? "chocolate chips" : "berries"]];
+        steps = ["Whisk the flour, sugar, and baking powder in a large bowl.", "Whisk egg, milk, and melted butter in a second bowl. Stir into the dry ingredients just until combined; fold in chocolate chips if using.", "For pancakes, cook ¼-cup portions on a buttered skillet over medium heat. Flip when bubbles stay open, then cook until golden. For waffles, cook portions in a preheated waffle iron until crisp and golden.", "Have a grown-up handle the hot pan or waffle iron. Serve warm."];
+      } else if (/french toast/.test(name)) {
+        ingredients = [["4 slices", "bread"], ["2", "eggs"], ["½ cup", "milk"], ["½ teaspoon", "cinnamon"], ["1 teaspoon", "vanilla"], ["1 tablespoon", "butter"]];
+        steps = ["Whisk eggs, milk, cinnamon, and vanilla in a shallow bowl.", "Dip each bread slice in the egg mixture, coating both sides.", "With a grown-up, cook in melted butter over medium heat for 2–3 minutes per side until golden and cooked through.", "Serve warm and refrigerate leftovers promptly."];
+      } else if (/egg|omelet/.test(name)) {
+        ingredients = [["2", "eggs"], ["1 tablespoon", "milk"], ["1 teaspoon", "butter"], ["¼ cup", /cheese/.test(name) ? "shredded cheese" : "chopped vegetables"], ["⅛ teaspoon", "salt"]];
+        steps = ["Beat eggs, milk, and salt in a bowl. Prepare the cheese or vegetables before heating the pan.", "With a grown-up, melt butter in a nonstick skillet over medium-low heat. Pour in the eggs.", "For scrambled eggs, stir gently until no liquid egg remains. For an omelet, let the eggs set, add filling to one half, fold, and cook until the center is done.", "An adult should confirm eggs are fully cooked. Serve immediately."];
+      } else if (/smoothie/.test(name)) {
+        const fruit = /banana/.test(name) ? "banana" : /strawberry/.test(name) ? "strawberries" : "mixed berries";
+        ingredients = [["1½ cups", fruit], ["¾ cup", "plain yogurt"], ["½ cup", "milk"], ["1 teaspoon", "honey, optional"]];
+        steps = ["Rinse fresh fruit and remove any stems. Ask an adult to cut larger fruit into pieces.", "Add fruit, yogurt, milk, and optional honey to a blender. Secure the lid.", "Blend until smooth. Stop the blender before opening it or scraping the sides.", "Pour into glasses and serve. Keep hands away from blender blades."];
+      } else if (/toast/.test(name)) {
+        ingredients = [["2 slices", "bread"], [/avocado/.test(name) ? "1" : "2 tablespoons", /avocado/.test(name) ? "ripe avocado" : /peanut butter/.test(name) ? "peanut butter" : "softened butter"], ["1 teaspoon", /avocado/.test(name) ? "lemon juice" : /cinnamon/.test(name) ? "sugar and cinnamon" : "honey, optional"]];
+        steps = ["Toast the bread until golden. Ask a grown-up to help with the toaster.", "Prepare the topping: mash avocado with lemon and a pinch of salt, or spread peanut butter or butter over the toast.", "Add the optional honey or cinnamon sugar and serve right away."];
+      } else if (/sandwich|wrap|burger/.test(name)) {
+        const filling = /tuna/.test(name) ? "1 can (5 ounces), drained tuna" : /turkey/.test(name) ? "4 ounces sliced turkey" : /ham/.test(name) ? "4 ounces sliced ham" : /chicken/.test(name) ? "1 cup cooked chicken" : "2 slices cheese";
+        ingredients = [["2", /wrap/.test(name) ? "flour tortillas" : "slices bread"], ["4 ounces", filling], ["½ cup", "washed lettuce"], ["4 slices", "tomato"], ["1 tablespoon", "mayonnaise or yogurt"]];
+        steps = ["Wash and dry the lettuce and tomato. Ask a grown-up to slice the tomato if needed.", "Spread mayonnaise or yogurt on the bread or tortilla. Add the filling, lettuce, and tomato.", "Fold the wrap tightly or place the second bread slice on top. Cut with an adult's help and serve chilled or toasted as appropriate.", "Keep raw meat separate from ready-to-eat ingredients; use only cooked filling."];
+      } else if (/pasta|spaghetti|ravioli|gnocchi|noodles|lasagna|ziti/.test(name)) {
+        ingredients = [["8 ounces", "pasta"], ["2 cups", /alfredo/.test(name) ? "prepared Alfredo sauce" : /butter/.test(name) ? "butter" : "tomato pasta sauce"], ["½ cup", "grated cheese"], ["1 tablespoon", "olive oil"], ["¼ teaspoon", "salt"]];
+        steps = ["Ask a grown-up to boil a large pot of water. Add pasta and cook according to its package directions.", "While pasta cooks, warm the sauce in a saucepan over low heat, stirring occasionally. For butter noodles, melt butter instead.", "Have an adult drain the pasta. Keep a little cooking water, then stir pasta into the sauce with a splash of that water if needed.", "Top with cheese and serve hot. The pot and drained pasta are very hot."];
+      } else if (/pizza/.test(name)) {
+        ingredients = [["1", "ready-made pizza base or flatbread"], ["¼ cup", "pizza sauce"], ["¾ cup", "shredded mozzarella"], ["½ cup", /pepperoni/.test(name) ? "sliced pepperoni" : /chicken/.test(name) ? "cooked chicken" : "chopped bell pepper"]];
+        steps = ["Ask a grown-up to preheat the oven to 425°F (220°C). Place the base on a baking sheet.", "Spread sauce over the base, leaving a small edge. Add cheese and the listed topping.", "Bake with an adult's help for 8–12 minutes until the cheese bubbles and the edges are golden.", "Cool for 5 minutes before slicing; the pan and toppings are hot."];
+      } else if (/taco|quesadilla|burrito|nachos|enchilada|empanada/.test(name)) {
+        ingredients = [["4", "tortillas"], ["1 cup", /chicken/.test(name) ? "cooked, shredded chicken" : /beef/.test(name) ? "cooked ground beef" : "cooked black beans"], ["½ cup", "shredded cheese"], ["½ cup", "salsa"], ["½ cup", "shredded lettuce"]];
+        steps = ["Rinse and shred the lettuce. Set out the cooked filling, cheese, and salsa.", "Warm the filling in a skillet with a grown-up until steaming. Raw ground beef must be cooked to 160°F (71°C); poultry to 165°F (74°C).", "For quesadillas, add filling and cheese to one tortilla, top with another, and cook in a dry skillet until crisp on both sides and cheese melts. For tacos or burritos, spoon filling onto warm tortillas and add toppings.", "Let hot fillings cool slightly before serving. Use separate utensils for raw and cooked food."];
+      } else if (/cookie|brownie|cake|muffin|cupcake|bread|pie|crumble|soufflé|souffle|tiramisu|cheesecake|macaron|croissant|pudding/.test(name)) {
+        ingredients = [["1½ cups", "all-purpose flour"], ["½ cup", "butter"], ["¾ cup", /chocolate|brownie|cocoa/.test(name) ? "cocoa powder or chocolate chips" : "sugar"], ["2", "eggs"], ["1 teaspoon", "vanilla extract"], ["1 teaspoon", "baking powder"]];
+        steps = ["Ask a grown-up to preheat the oven to 350°F (175°C) and prepare the baking pan. Measure every ingredient before mixing.", "Whisk the flour and baking powder. In a separate bowl, mix butter and sugar; beat in eggs and vanilla.", "Stir dry ingredients into the butter mixture just until combined. Fold in chocolate chips or cocoa if making a chocolate dessert.", "Spread into the pan and bake with an adult's help until set and a toothpick comes out clean or with a few crumbs. Timing varies by pan and dessert.", "Cool completely before slicing or frosting. Hot pans must be handled by a grown-up."];
+      } else if (/rice|paella/.test(name)) {
+        ingredients = [["1 cup", "rice"], ["2 cups", "water or low-sodium broth"], ["1 cup", /chicken/.test(name) ? "cooked chicken" : "mixed vegetables"], ["1 tablespoon", "oil"], ["1 tablespoon", "low-sodium soy sauce, optional"]];
+        steps = ["Rinse the rice in a sieve until the water runs mostly clear.", "Ask a grown-up to bring rice and water or broth to a boil in a covered saucepan. Reduce heat to low and simmer according to the rice package.", "Heat oil in a skillet with an adult. Cook the vegetables until tender; add only fully cooked chicken if using.", "Fluff cooked rice with a fork, stir it into the vegetables, and heat until steaming. Season lightly and serve."];
+      } else if (/chicken|nugget/.test(name)) {
+        ingredients = [["1 pound", "boneless chicken"], ["½ cup", "all-purpose flour"], ["1", "beaten egg"], ["1 cup", "breadcrumbs"], ["1 tablespoon", "oil"]];
+        steps = ["Ask an adult to cut the chicken into even pieces. Keep raw chicken and its utensils separate from other food.", "Set out three bowls: flour; beaten egg; and breadcrumbs. Coat each chicken piece in flour, egg, then breadcrumbs.", "An adult should pan-fry in oil or bake on a lined tray at 400°F (200°C) until the thickest piece reaches 165°F (74°C) on a food thermometer.", "Rest for 2 minutes and serve with a dipping sauce. Wash hands and surfaces that touched raw chicken."];
+      } else if (/fruit|apple|banana|strawberry|skewer/.test(name)) {
+        ingredients = [["2 cups", "washed seasonal fruit"], ["1 cup", /yogurt/.test(name) ? "plain yogurt" : "strawberries"], ["1", "banana"], ["1 teaspoon", "lemon juice, optional"]];
+        steps = ["Wash all fruit under cool running water and dry it with a clean towel.", "Ask an adult to cut any firm fruit into bite-size pieces. Use a table knife for soft fruit.", "Arrange the fruit in cups or thread onto blunt skewers with an adult's help. Add yogurt for dipping if desired.", "Serve chilled. If using wooden skewers, handle the pointed ends carefully with an adult."];
+      } else {
+        ingredients = [["2 cups", "main ingredient for this recipe"], ["1 cup", "washed or prepared vegetables"], ["1 tablespoon", "oil or butter"], ["½ teaspoon", "salt or seasoning"], ["½ cup", "sauce or cheese"]];
+        steps = ["Read the ingredient list and prepare the main ingredient as described in the recipe name. Wash produce and measure the remaining ingredients.", "With a grown-up, heat a pan over medium heat. Add oil or butter, then cook the main ingredient until safely done for that food.", "Add prepared vegetables and sauce or cheese. Stir and cook until the vegetables are tender and the whole dish is hot.", "Taste only food that is fully cooked. Adjust seasoning, turn off the heat, and serve with an adult's help."];
+      }
+      return { servings: 4, ingredients: ingredients.map(([amount, item]) => ingredient(amount, item)), steps };
+    }
+    function recipeIngredients(recipe) { return buildRecipeDetails(recipe).ingredients; }
+    function starsFor(recipe) { return "★".repeat(recipe.rating) + "☆".repeat(5 - recipe.rating); }
+    function heartButton(recipe) {
+      const on = state.favorites.includes(recipe.id);
+      return `<button type="button" class="heart-button ${on ? "on" : ""}" data-heart="${esc(recipe.id)}" aria-pressed="${on}" aria-label="${on ? "Remove" : "Add"} ${esc(recipe.name)} ${on ? "from" : "to"} favorites">${on ? "♥" : "♡"}</button>`;
+    }
+    function toggleFavorite(id) {
+      state.favorites = state.favorites.includes(id) ? state.favorites.filter((item) => item !== id) : [...state.favorites, id];
+      saveProgress();
+    }
+    function bindHearts(redraw) {
+      app.querySelectorAll("[data-heart]").forEach((button) => button.addEventListener("click", () => {
+        const id = button.dataset.heart;
+        toggleFavorite(id);
+        redraw();
+        [...app.querySelectorAll("[data-heart]")].find((item) => item.dataset.heart === id)?.focus();
+      }));
+    }
+    function recipeCard(recipe) {
+      const locked = !unlocked(recipe);
+      const done = state.completed.includes(recipe.id);
+      return `<article class="recipe-card ${locked ? "locked" : ""}">${heartButton(recipe)}<div class="recipe-card-photo" style="${recipeImage(recipe)}" role="img" aria-label="${recipe.name}"></div><div class="recipe-card-body"><h3>${recipe.name}</h3><p>${recipe.category} · ${recipe.difficulty} challenge</p><div class="card-meta"><span>${locked ? `🔒 ${recipe.unlock} stars` : `◷ ${recipe.time}`}</span><span>${done ? "✓ Cooked" : starsFor(recipe)}</span></div>${locked ? "" : `<button class="primary-button card-cook" data-cook="${esc(recipe.id)}">${done ? "Cook again" : "Cook this"}</button>`}</div></article>`;
+    }
+    function renderHome() {
+      const firstAvailable = recipes.find((recipe) => unlocked(recipe) && !state.completed.includes(recipe.id)) || recipes[0];
+      const selected = recipes.find((recipe) => recipe.id === state.recipeId);
+      const featured = selected && !state.completed.includes(selected.id) ? selected : firstAvailable;
+      state.recipeId = featured.id;
+      const favoriteRecipes = state.favorites.map((id) => recipes.find((recipe) => recipe.id === id)).filter(Boolean);
+      const showFavorites = state.homeTab === "favorites";
+      const shelf = showFavorites ? (favoriteRecipes.length ? favoriteRecipes.map(recipeCard).join("") : `<p class="shelf-empty">No favorites yet. Tap the ♡ on any recipe to save it here.</p>`) : recipes.filter((recipe) => unlocked(recipe)).slice(0, 3).map(recipeCard).join("");
+      app.innerHTML = `<p class="eyebrow">A little something delicious</p><h1>Welcome to your kitchen!</h1><p class="intro">Pick a recipe, try a new skill, and make something wonderful.</p><section class="feature" aria-label="Today's recipe"><div class="feature-copy"><p class="eyebrow">${state.completed.includes(featured.id) ? "Ready for seconds?" : "Today's little adventure"}</p><h2>${featured.name}</h2><p>A hands-on cooking adventure with a little lesson in every step.</p><div class="feature-meta"><span>◷ ${featured.time}</span><span>✦ ${skillFor(featured)}</span><span>${featured.difficulty}</span></div><button class="primary-button" data-action="start">${state.completed.includes(featured.id) ? "Cook it again" : "Let's cook"}&nbsp; →</button></div><div class="feature-photo" style="${recipeImage(featured)}" role="img" aria-label="A freshly made ${featured.name.toLowerCase()}"></div></section><div class="section-heading"><h2>Your recipe shelf</h2><button class="text-button" data-screen="book">Browse all ${recipes.length} recipes&nbsp; →</button></div><div class="filter-row" role="group" aria-label="Recipe shelf"><button class="filter-button" data-tab="all" aria-pressed="${!showFavorites}">All</button><button class="filter-button" data-tab="favorites" aria-pressed="${showFavorites}">♥ Favorites (${favoriteRecipes.length})</button></div><div class="recipe-grid">${shelf}</div>`;
+      app.querySelector('[data-action="start"]').addEventListener("click", () => startRecipe(featured.id));
+      app.querySelector('[data-screen="book"]').addEventListener("click", () => { state.screen = "book"; render(); });
+      app.querySelectorAll("[data-tab]").forEach((button) => button.addEventListener("click", () => { state.homeTab = button.dataset.tab; renderHome(); }));
+      app.querySelectorAll("[data-cook]").forEach((button) => button.addEventListener("click", () => startRecipe(button.dataset.cook)));
+      bindHearts(renderHome);
+    }
+    function renderBook() {
+      const categories = ["All", ...groups.map((group) => group.category)];
+      const filtered = recipes.filter((recipe) => recipe.name.toLowerCase().includes(state.search.toLowerCase()) && (state.category === "All" || recipe.category === state.category) && (state.difficulty === "All" || state.difficulty === recipe.difficulty) && (!state.showFavoritesOnly || state.favorites.includes(recipe.id)));
+      app.innerHTML = `<div class="screen-heading"><div><p class="eyebrow">Collected with care</p><h1>Your recipe book</h1><p>${recipes.length} recipes, from first flips to big kitchen challenges.</p></div><div class="star-count"><span class="star-icon" aria-hidden="true">★</span>${state.stars} stars</div></div><div class="book-tools"><label class="search-wrap"><span aria-hidden="true">⌕</span><input id="recipe-search" type="search" placeholder="Find a recipe" aria-label="Search recipes" value="${state.search.replace(/&/g, "&amp;").replace(/"/g, "&quot;")}"></label><label><span class="sr-only">Filter by category</span><select id="category-select">${categories.map((category) => `<option ${state.category === category ? "selected" : ""}>${category}</option>`).join("")}</select></label><label><span class="sr-only">Filter by difficulty</span><select id="difficulty-select">${["All", "Easy", "Hard", "Extreme"].map((difficulty) => `<option ${state.difficulty === difficulty ? "selected" : ""}>${difficulty === "All" ? "All difficulties" : difficulty}</option>`).join("")}</select></label></div><div class="filter-row" role="group" aria-label="Recipe categories">${categories.map((category) => `<button class="filter-button" data-category="${category}" aria-pressed="${state.category === category}">${category}</button>`).join("")}</div><p class="result-count" aria-live="polite">Showing ${filtered.length} of ${recipes.length} recipes</p><div class="book-grid">${filtered.length ? filtered.map((recipe) => { const locked = !unlocked(recipe); const done = state.completed.includes(recipe.id); return `<article class="book-card ${locked ? "locked" : ""}"><div class="recipe-card-photo" style="${recipeImage(recipe)}" role="img" aria-label="${recipe.name}"></div><div class="book-card-body"><h2>${recipe.name}</h2><p>${recipe.category} · ${recipe.difficulty} · ${starsFor(recipe)}</p><div class="book-footer">${locked ? `<span class="locked-label">🔒 ${recipe.unlock} stars to unlock</span>` : `<span>◷ ${recipe.time}${done ? " · Cooked ✓" : ""}</span><button class="${done ? "secondary-button" : "primary-button"}" data-cook="${recipe.id}">${done ? "Cook again" : "Cook this"}</button>`}</div></div></article>`; }).join("") : `<div class="no-results">No recipes found. Try a different search.</div>`}</div>`;
+      const createButton = document.createElement("button");
+      createButton.className = "primary-button";
+      createButton.textContent = "Create a recipe";
+      createButton.addEventListener("click", () => { state.screen = "create-recipe"; render(); });
+      app.querySelector(".screen-heading").append(createButton);
+      const favoriteFilter = document.createElement("button");
+      favoriteFilter.className = "filter-button";
+      favoriteFilter.textContent = state.showFavoritesOnly ? "★ Favorites only" : "☆ Favorites";
+      favoriteFilter.setAttribute("aria-pressed", String(state.showFavoritesOnly));
+      favoriteFilter.addEventListener("click", () => { state.showFavoritesOnly = !state.showFavoritesOnly; renderBook(); });
+      app.querySelector(".filter-row").append(favoriteFilter);
+      app.querySelectorAll(".book-card").forEach((card, index) => {
+        const recipe = filtered[index];
+        const tools = document.createElement("div");
+        tools.className = "recipe-tools";
+        tools.innerHTML = `<span class="sr-only">Personal rating and notes</span>`;
+        card.querySelector(".book-card-body").append(tools);
+        card.insertAdjacentHTML("afterbegin", heartButton(recipe));
+        const notes = document.createElement("details");
+        notes.className = "recipe-notes";
+        notes.innerHTML = `<summary>${state.notes[recipe.id] ? "Edit notes" : "Add notes and rating"}</summary><label class="sr-only" for="rating-${recipe.id}">Your rating for ${recipe.name}</label><select id="rating-${recipe.id}" data-rating><option value="0">Not rated</option>${[1, 2, 3, 4, 5].map((score) => `<option value="${score}" ${Number(state.ratings[recipe.id]) === score ? "selected" : ""}>${"★".repeat(score)} (${score}/5)</option>`).join("")}</select><label class="sr-only" for="note-${recipe.id}">Notes for ${recipe.name}</label><textarea id="note-${recipe.id}" data-note placeholder="Your tweaks, ideas, or memories"></textarea><button class="secondary-button" data-save-notes>Save notes</button>`;
+        notes.querySelector("[data-note]").value = state.notes[recipe.id] || "";
+        notes.querySelector("[data-save-notes]").addEventListener("click", () => {
+          state.notes[recipe.id] = notes.querySelector("[data-note]").value.trim();
+          state.ratings[recipe.id] = Number(notes.querySelector("[data-rating]").value) || 0;
+          saveProgress();
+          notify("Recipe notes and rating saved.");
+        });
+        card.querySelector(".book-card-body").append(notes);
+      });
+      bindHearts(renderBook);
+      app.querySelector("#recipe-search").addEventListener("input", (event) => { state.search = event.target.value; renderBook(); const input = app.querySelector("#recipe-search"); input.focus(); input.setSelectionRange(input.value.length, input.value.length); });
+      app.querySelector("#category-select").addEventListener("change", (event) => { state.category = event.target.value; render(); });
+      app.querySelector("#difficulty-select").addEventListener("change", (event) => { state.difficulty = event.target.value === "All difficulties" ? "All" : event.target.value; render(); });
+      app.querySelectorAll("[data-category]").forEach((button) => button.addEventListener("click", () => { state.category = button.dataset.category; render(); }));
+      app.querySelectorAll("[data-cook]").forEach((button) => button.addEventListener("click", () => startRecipe(button.dataset.cook)));
+    }
+    function renderCreateRecipe() {
+      app.innerHTML = `<div class="screen-heading"><div><p class="eyebrow">Your kitchen, your recipe</p><h1>Create a recipe</h1><p>Add your own ingredients and cooking steps to your recipe book.</p></div><button class="secondary-button" data-action="back">← Recipe book</button></div><form class="create-recipe-form" id="create-recipe-form"><label class="field-label wide" for="custom-name">Recipe name<input class="field-label" id="custom-name" name="name" maxlength="60" required></label><label class="field-label" for="custom-category">Category<select id="custom-category" name="category"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snacks</option><option>Desserts</option></select></label><label class="field-label" for="custom-ingredients">Ingredients, separated by commas<textarea id="custom-ingredients" name="ingredients" placeholder="Flour, milk, egg" required></textarea></label><label class="field-label wide" for="custom-steps">Cooking steps, one per line<textarea id="custom-steps" name="steps" placeholder="Mix the ingredients together.&#10;Cook until golden." required></textarea></label><div class="wide"><button class="primary-button" type="submit">Save my recipe</button></div></form>`;
+      app.querySelector('[data-action="back"]').addEventListener("click", () => { state.screen = "book"; render(); });
+      app.querySelector("#create-recipe-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const name = app.querySelector("#custom-name").value.trim();
+        const ingredients = app.querySelector("#custom-ingredients").value.split(",").map((item) => item.trim()).filter(Boolean).slice(0, 12);
+        const instructions = app.querySelector("#custom-steps").value.split("\n").map((item) => item.trim()).filter(Boolean).slice(0, 12);
+        if (ingredients.length < 2 || !instructions.length) { notify("Add at least two ingredients and one cooking step."); return; }
+        const recipe = { id: `personal-${Date.now()}`, name, category: app.querySelector("#custom-category").value, difficulty: "Easy", rating: 1, unlock: 0, time: "Personal recipe", customIngredients: ingredients, customInstructions: instructions, personal: true };
+        state.personalRecipes.push(recipe);
+        recipes.push(recipe);
+        saveProgress();
+        state.screen = "book";
+        state.category = "All";
+        state.search = "";
+        render();
+        notify(`${name} added to your recipe book.`);
+      });
+    }
+    const screenTitles = { home: "Today", book: "Recipe book", "create-recipe": "Create a recipe", explore: "Explore recipes", planner: "Meal planner", shopping: "Shopping list", academy: "Cooking academy", challenges: "Challenges", achievements: "Achievements", gallery: "My food gallery", chef: "Chef AI", profile: "My chef profile", settings: "Settings", cook: "Cooking" };
+    function recipeById(id) { return recipes.find((recipe) => recipe.id === id); }
+    function ingredientCount(recipe) { return buildRecipeDetails(recipe).ingredients.length; }
+    function minutesOf(recipe) { const match = /^(\d+)/.exec(recipe.time || ""); return match ? Number(match[1]) : Infinity; }
+    function hashText(text) { let hash = 0; for (const character of text) hash = (hash * 31 + character.charCodeAt(0)) >>> 0; return hash; }
+    function seededShuffle(list, seed) {
+      const copy = [...list];
+      let value = hashText(seed) || 1;
+      for (let index = copy.length - 1; index > 0; index--) { value = (value * 1664525 + 1013904223) >>> 0; const other = value % (index + 1); [copy[index], copy[other]] = [copy[other], copy[index]]; }
+      return copy;
+    }
+    function dateFromKey(key) { const [year, month, day] = key.split("-").map(Number); return new Date(year, month - 1, day); }
+    function addDays(key, days) { const date = dateFromKey(key); date.setDate(date.getDate() + days); return dayKey(date); }
+    function weekStartKey(date = new Date()) { const copy = new Date(date); copy.setDate(copy.getDate() - (copy.getDay() + 6) % 7); return dayKey(copy); }
+    function bindCookButtons() { app.querySelectorAll("[data-cook]").forEach((button) => button.addEventListener("click", () => startRecipe(button.dataset.cook))); }
+    function bindListButtons() { app.querySelectorAll("[data-list]").forEach((button) => button.addEventListener("click", () => { const recipe = recipeById(button.dataset.list); if (recipe) addRecipeToList(recipe); })); }
+    function normalizeProgress() {
+      const isObject = (value) => value && typeof value === "object" && !Array.isArray(value);
+      state.plan = isObject(state.plan) ? state.plan : {};
+      state.shopping = state.shopping.filter((item) => item && typeof item.key === "string" && typeof item.name === "string" && Array.isArray(item.parts)).map((item) => ({ key: item.key, name: item.name, have: item.have === true, parts: item.parts.filter((part) => part && typeof part.recipeId === "string").map((part) => ({ recipeId: part.recipeId, qty: typeof part.qty === "number" ? part.qty : null, unit: typeof part.unit === "string" ? part.unit : "" })) }));
+      state.gallery = state.gallery.filter((entry) => entry && typeof entry.id === "string" && typeof entry.recipeId === "string" && typeof entry.date === "string");
+      state.cookedLog = state.cookedLog.filter((entry) => entry && typeof entry.date === "string" && typeof entry.id === "string");
+      state.lessons = state.lessons.filter((id) => typeof id === "string");
+      if (!isObject(state.challenges)) state.challenges = {};
+      if (!isObject(state.challenges.claimed)) state.challenges.claimed = {};
+      if (!isObject(state.challenges.revealed)) state.challenges.revealed = {};
+      state.badges = Array.isArray(saved.badges) ? saved.badges.filter((id) => typeof id === "string") : null;
+      state.weekOffset = 0;
+      state.academy = null;
+      state.exploreQuery = "";
+      state.exploreSurprise = "";
+    }
+
+    // Cooking log, gallery entries and achievements.
+    function logCook(recipe, firstCook) {
+      const today = dayKey();
+      state.cookedLog = [...state.cookedLog, { date: today, id: recipe.id, first: firstCook }].slice(-400);
+      state.gallery = [...state.gallery, { id: `g-${Date.now()}-${state.gallery.length}`, recipeId: recipe.id, date: today, photo: "", caption: "" }];
+    }
+    const LESSONS = [
+      { id: "safety", icon: "🧤", title: "Kitchen safety first", minutes: 4, intro: "A safe kitchen is a fun kitchen. These habits keep everyone from getting hurt.",
+        points: ["Ask a grown-up before using knives, the stove, the oven or a blender.", "Tie back long hair and roll up long sleeves.", "Turn pan handles inward so they cannot be bumped.", "Use dry oven mitts for hot things. A wet cloth can cause a steam burn.", "Wipe up spills right away so nobody slips."],
+        quiz: [["A pan handle sticks out over the edge of the stove. What should you do?", ["Leave it, it is fine", "Turn it inward, away from the edge", "Hang a towel on it"], 1, "A handle sticking out can get bumped and spill hot food."], ["What should you use to take something hot out of the oven?", ["A wet towel", "Bare hands, quickly", "Dry oven mitts"], 2, "Wet cloth lets heat and steam through fast and can burn you."], ["When should you ask a grown-up for help?", ["Only when something goes wrong", "Whenever you use knives, the stove, the oven or a blender", "Never, if the recipe is easy"], 1, "Hot and sharp tools are always grown-up territory."]] },
+      { id: "hygiene", icon: "🧼", title: "Clean hands, clean kitchen", minutes: 4, intro: "Germs can hide on hands, boards and counters. A few habits keep food safe to eat.",
+        points: ["Wash your hands with soap and warm water for about 20 seconds before cooking.", "Wash again after touching raw meat, raw eggs, pets, or after sneezing.", "Use one cutting board for raw meat and another for fruit, vegetables and bread.", "Rinse fruit and vegetables under cool running water.", "Do not rinse raw chicken: it splashes germs around. Cook it fully instead."],
+        quiz: [["How long should you wash your hands?", ["About 2 seconds", "Until the water is cold", "About 20 seconds"], 2, "Twenty seconds with soap lifts germs off your skin."], ["You touched raw chicken. What next?", ["Wipe your hands on your apron", "Wash hands, board and tools with hot soapy water", "Rinse the chicken in the sink"], 1, "Soap and hot water clean what the raw chicken touched."], ["Which should be kept separate?", ["Bread and butter", "Pasta and rice", "Raw meat and ready-to-eat foods like salad"], 2, "Raw meat can spread germs to food that will not be cooked."]] },
+      { id: "measuring", icon: "🥣", title: "Measuring like a baker", minutes: 5, intro: "Baking is a bit like science. Accurate amounts help your food turn out.",
+        points: ["Spoon dry ingredients like flour into the cup, then level the top with a knife.", "Do not pack flour down. Brown sugar is the exception: press it in.", "Measure liquids in a clear jug on a flat counter and read it at eye level.", "3 teaspoons make 1 tablespoon.", "4 tablespoons make ¼ cup."],
+        quiz: [["3 teaspoons equal how many tablespoons?", ["3", "½", "1"], 2, "3 teaspoons = 1 tablespoon."], ["How should you measure flour?", ["Pack it down tightly", "Spoon it in and level off the top", "Guess by eye"], 1, "Packed flour gives you too much, which makes baked goods dry."], ["Where should you read a liquid measurement?", ["From above while holding the jug", "At eye level on a flat counter", "It does not matter"], 1, "Reading from the side on a flat surface is the most accurate."]] },
+      { id: "reading", icon: "📖", title: "Reading a recipe", minutes: 4, intro: "Chefs call getting ready first mise en place (say meez-on-plass). It means everything in its place.",
+        points: ["Read the whole recipe from top to bottom before you start.", "Check you have every ingredient and tool.", "Wash, measure and chop before you turn on any heat.", "Note times and temperatures, and follow the steps in order.", "Clean as you go so the kitchen stays tidy."],
+        quiz: [["What does mise en place mean?", ["Getting everything ready before you start cooking", "Cooking very fast", "A kind of pan"], 0, "It means everything in its place before the cooking starts."], ["What should you do first?", ["Turn on the stove", "Read the whole recipe", "Start chopping"], 1, "Reading first stops surprises halfway through."], ["Why prep ingredients before heating the pan?", ["Food can burn while you hunt for the next ingredient", "It makes the pan hotter", "It is not needed"], 0, "Cooking moves quickly, so everything should be ready."]] },
+      { id: "knife", icon: "🔪", title: "Knife skills", minutes: 5, intro: "Always work with a grown-up when you use a knife. These habits keep fingers safe.",
+        points: ["A sharp knife is safer than a dull one because it slips less.", "Put a damp towel under the cutting board so it cannot slide.", "Make a claw with your guiding hand: fingertips tucked in, knuckles touching the knife.", "Cut round foods in half first so they lie flat.", "Carry a knife with the tip pointing down. If one falls, step back and let it fall."],
+        quiz: [["What does the claw grip protect?", ["The cutting board", "Your fingertips", "The knife"], 1, "Tucked fingertips stay out of the blade's path."], ["A knife falls off the counter. What do you do?", ["Try to catch it", "Step back and let it fall", "Kick it away"], 1, "Catching a knife is how people get cut."], ["The cutting board keeps sliding. What helps?", ["Press harder", "Put a damp towel underneath", "Use a smaller knife"], 1, "A damp towel grips the counter."]] },
+      { id: "heat", icon: "🔥", title: "Heat control", minutes: 4, intro: "Most cooking mistakes come from heat that is too high or too low.",
+        points: ["Low heat is gentle: melting, keeping warm, slow simmers.", "Medium heat suits most cooking, like pancakes and eggs.", "High heat is for boiling water and quick browning, with a grown-up watching.", "Let the pan warm up before you add food.", "Do not crowd the pan: too much food steams instead of browning."],
+        quiz: [["Which heat is best for most pancakes?", ["High", "Medium", "The highest setting, then low"], 1, "Medium cooks the inside before the outside burns."], ["Why not crowd the pan?", ["Food steams instead of browning", "It uses more oil", "It cools the stove"], 0, "Steam keeps the surface from browning."], ["You need to leave the kitchen. What first?", ["Turn the heat off", "Turn it up so it cooks faster", "Put a lid on and leave it"], 0, "Never leave a hot pan unattended."]] },
+      { id: "boiling", icon: "🍝", title: "Boiling, simmering and pasta", minutes: 5, intro: "Boiling and simmering are different. Knowing the difference helps with pasta, soup and sauce.",
+        points: ["A boil has big, rolling bubbles. A simmer has small, gentle bubbles.", "Use a big pot with plenty of salted water for pasta, and stir early so it does not stick.", "Ask a grown-up to drain a pot of boiling water.", "Lift a lid away from you so steam does not burn your face.", "Taste a piece of pasta a minute or two before the time on the packet."],
+        quiz: [["What does a simmer look like?", ["Small, gentle bubbles", "Huge rolling bubbles", "No bubbles at all"], 0, "Simmering is below a full boil."], ["How should you lift a hot pot's lid?", ["Straight up over your face", "Tilted away from you", "With a wet cloth"], 1, "Steam can burn, so tilt the lid away."], ["Who should drain a pot of boiling water?", ["Nobody, it cools by itself", "A grown-up, or you with a grown-up's help", "Whoever is closest"], 1, "Hot water and steam can cause serious burns."]] },
+      { id: "baking", icon: "🧁", title: "Baking basics", minutes: 5, intro: "Cakes, muffins and cookies reward patience and careful steps.",
+        points: ["Preheat the oven so baking starts at the right temperature.", "Measure accurately and mix just until combined for muffins and pancakes.", "Try not to open the oven door early, because heat escapes.", "Test with a toothpick: it should come out clean or with a few crumbs.", "Cool treats before cutting or frosting."],
+        quiz: [["The toothpick test: what do you want to see?", ["Wet batter", "Clean, or with a few crumbs", "Burnt edges"], 1, "That means the middle is cooked."], ["Why preheat the oven?", ["So it bakes evenly from the start", "To warm the kitchen", "It saves time later"], 0, "A cold oven changes how things rise and brown."], ["What does overmixing muffin batter cause?", ["Tough muffins", "Extra fluffy muffins", "Nothing"], 0, "Too much mixing builds gluten, which makes them chewy and tough."]] },
+      { id: "eggs", icon: "🥚", title: "Eggs 101", minutes: 4, intro: "Eggs are in lots of recipes. Cracking and cooking them well matters.",
+        points: ["Crack an egg on a flat surface, not the bowl's edge, to avoid shell bits.", "Fish out any shell with a larger piece of shell.", "Wash your hands after touching raw egg.", "Cook egg dishes until firm, with no runny whites.", "Keep eggs in the fridge."],
+        quiz: [["Where is the best place to crack an egg?", ["On a flat surface", "On the edge of the bowl", "In the air"], 0, "A flat surface makes a cleaner break."], ["After touching raw egg, you should...", ["Wash your hands", "Touch your face", "Wipe your hands on the towel"], 0, "Raw egg can carry germs."], ["How should egg dishes be cooked?", ["Until firm, with no runny whites", "Just warmed through", "As fast as possible"], 0, "Fully cooked eggs are safer to eat."]] },
+      { id: "storage", icon: "🥡", title: "Storing leftovers", minutes: 4, intro: "Good leftovers are safe leftovers. Cool, cover and chill them promptly.",
+        points: ["Put cooked food in the fridge within 2 hours.", "Use shallow containers so food cools quickly.", "Label with the date, and eat within 3 to 4 days.", "Reheat leftovers until they are steaming hot.", "When in doubt, throw it out."],
+        quiz: [["How soon should leftovers go in the fridge?", ["Within 2 hours", "Tomorrow", "Whenever you remember"], 0, "Germs grow quickly at room temperature."], ["How long can cooked leftovers stay in the fridge?", ["3 to 4 days", "2 weeks", "A month"], 0, "After a few days they are no longer safe."], ["Reheat leftovers until they are...", ["Lukewarm", "Steaming hot", "Just warm on the edges"], 1, "Heat kills germs that may have grown."]] }
+    ];
+    const ACHIEVEMENTS = [
+      { id: "first-cook", icon: "🥄", title: "First dish", text: "Cook your first recipe.", target: 1, value: () => state.completed.length },
+      { id: "cook-5", icon: "🍳", title: "Home cook", text: "Cook 5 different recipes.", target: 5, value: () => state.completed.length },
+      { id: "cook-15", icon: "🥘", title: "Kitchen regular", text: "Cook 15 different recipes.", target: 15, value: () => state.completed.length },
+      { id: "cook-30", icon: "👩‍🍳", title: "Seasoned chef", text: "Cook 30 different recipes.", target: 30, value: () => state.completed.length },
+      { id: "cook-60", icon: "🏆", title: "Master of the menu", text: "Cook 60 different recipes.", target: 60, value: () => state.completed.length },
+      { id: "well-rounded", icon: "🍽️", title: "Well-rounded", text: "Cook breakfast, lunch, dinner, a snack and a dessert.", target: 5, value: () => new Set(state.completed.map((id) => recipeById(id)?.category).filter((category) => ["Breakfast", "Lunch", "Dinner", "Snacks", "Desserts"].includes(category))).size },
+      { id: "brave", icon: "💪", title: "Brave cook", text: "Cook a Hard recipe.", target: 1, value: () => state.completed.filter((id) => recipeById(id)?.difficulty === "Hard").length },
+      { id: "extreme", icon: "👑", title: "Extreme chef", text: "Cook an Extreme recipe.", target: 1, value: () => state.completed.filter((id) => recipeById(id)?.difficulty === "Extreme").length },
+      { id: "streak-3", icon: "⚡", title: "On a roll", text: "Reach a 3-day cooking streak.", target: 3, value: () => state.streak.best },
+      { id: "streak-7", icon: "🔥", title: "Week of cooking", text: "Reach a 7-day cooking streak.", target: 7, value: () => state.streak.best },
+      { id: "streak-14", icon: "🌟", title: "Fortnight flame", text: "Reach a 14-day cooking streak.", target: 14, value: () => state.streak.best },
+      { id: "streak-30", icon: "☀️", title: "Monthly master", text: "Reach a 30-day cooking streak.", target: 30, value: () => state.streak.best },
+      { id: "fav-1", icon: "♥", title: "Food lover", text: "Favorite your first recipe.", target: 1, value: () => state.favorites.length },
+      { id: "fav-10", icon: "💞", title: "Heart collector", text: "Favorite 10 recipes.", target: 10, value: () => state.favorites.length },
+      { id: "writer", icon: "✍️", title: "Recipe writer", text: "Create your own recipe.", target: 1, value: () => state.personalRecipes.length },
+      { id: "taster", icon: "📝", title: "Taste tester", text: "Rate a recipe or add a note.", target: 1, value: () => new Set([...Object.keys(state.ratings).filter((id) => state.ratings[id] > 0), ...Object.keys(state.notes).filter((id) => state.notes[id])]).size },
+      { id: "planner", icon: "📅", title: "Meal planner", text: "Plan 7 meals.", target: 7, value: () => Object.values(state.plan).reduce((sum, day) => sum + Object.keys(day || {}).length, 0) },
+      { id: "shopper", icon: "🛒", title: "Smart shopper", text: "Add a recipe to your shopping list.", target: 1, value: () => new Set(state.shopping.flatMap((item) => item.parts.map((part) => part.recipeId)).filter((id) => id !== "custom")).size },
+      { id: "student-3", icon: "🎓", title: "Good student", text: "Complete 3 Cooking Academy lessons.", target: 3, value: () => state.lessons.length },
+      { id: "scholar", icon: "📚", title: "Cooking scholar", text: "Complete every Cooking Academy lesson.", target: LESSONS.length, value: () => state.lessons.length },
+      { id: "challenger", icon: "🎯", title: "Challenger", text: "Claim a challenge reward.", target: 1, value: () => Object.keys(state.challenges.claimed).length },
+      { id: "champion", icon: "🥇", title: "Challenge champion", text: "Claim 10 challenge rewards.", target: 10, value: () => Object.keys(state.challenges.claimed).length },
+      { id: "photographer", icon: "📸", title: "Food photographer", text: "Add a photo to your food gallery.", target: 1, value: () => state.gallery.filter((entry) => safePhoto(entry.photo)).length },
+      { id: "stars-25", icon: "⭐", title: "Star collector", text: "Collect 25 stars.", target: 25, value: () => state.stars }
+    ];
+    function earnedAchievements() { return ACHIEVEMENTS.filter((item) => item.value() >= item.target).map((item) => item.id); }
+    function checkAchievements() {
+      const earned = earnedAchievements();
+      if (state.badges === null) { state.badges = earned; return; }
+      const fresh = earned.filter((id) => !state.badges.includes(id));
+      if (!fresh.length) return;
+      state.badges = [...state.badges, ...fresh];
+      const titles = fresh.map((id) => ACHIEVEMENTS.find((item) => item.id === id).title);
+      setTimeout(() => notify(`🏅 Badge unlocked: ${titles.join(", ")}`), 400);
+    }
+    function safePhoto(value) { return typeof value === "string" && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(value) ? value : ""; }
+
+    // Shopping list: amounts are parsed so the same ingredient from several recipes combines.
+    const FRACTION_VALUES = { "½": 0.5, "⅓": 1 / 3, "⅔": 2 / 3, "¼": 0.25, "¾": 0.75, "⅛": 0.125, "⅜": 0.375, "⅝": 0.625, "⅞": 0.875 };
+    const FRACTION_GLYPHS = [[0.125, "⅛"], [0.25, "¼"], [1 / 3, "⅓"], [0.375, "⅜"], [0.5, "½"], [0.625, "⅝"], [2 / 3, "⅔"], [0.75, "¾"], [0.875, "⅞"]];
+    function parseAmount(text) {
+      let rest = String(text || "").trim().toLowerCase();
+      let quantity = null;
+      let match;
+      if ((match = rest.match(/^(\d+)\s+(\d+)\/(\d+)\s*/))) quantity = Number(match[1]) + Number(match[2]) / Number(match[3]);
+      else if ((match = rest.match(/^(\d+)\/(\d+)\s*/))) quantity = Number(match[1]) / Number(match[2]);
+      else if ((match = rest.match(/^(\d+(?:\.\d+)?)?([½⅓⅔¼¾⅛⅜⅝⅞])\s*/))) quantity = Number(match[1] || 0) + FRACTION_VALUES[match[2]];
+      else if ((match = rest.match(/^(\d+(?:\.\d+)?)\s*/))) quantity = Number(match[1]);
+      if (match) rest = rest.slice(match[0].length);
+      const unit = rest.replace(/^(large|medium|small|ripe|whole)\b\s*/, "").trim().replace(/ies$/, "y").replace(/(ch|sh|x|s)es$/, "$1").replace(/([^s])s$/, "$1");
+      return { qty: quantity, unit };
+    }
+    function formatQty(quantity) {
+      const whole = Math.floor(quantity + 1e-9);
+      const fraction = quantity - whole;
+      if (fraction < 0.0625) return String(whole);
+      if (fraction > 0.9375) return String(whole + 1);
+      const nearest = FRACTION_GLYPHS.reduce((best, entry) => Math.abs(entry[0] - fraction) < Math.abs(best[0] - fraction) ? entry : best);
+      if (Math.abs(nearest[0] - fraction) > 0.07) return String(Math.round(quantity * 100) / 100);
+      return `${whole || ""}${nearest[1]}`;
+    }
+    function amountLabel(parts) {
+      const totals = new Map();
+      for (const part of parts) {
+        const entry = totals.get(part.unit) || { qty: 0, counted: false };
+        if (typeof part.qty === "number") { entry.qty += part.qty; entry.counted = true; }
+        totals.set(part.unit, entry);
+      }
+      return [...totals].map(([unit, entry]) => {
+        if (!entry.counted) return unit ? unit.charAt(0).toUpperCase() + unit.slice(1) : "";
+        const label = unit ? (entry.qty > 1 ? unit + (/(ch|sh|x|s)$/.test(unit) ? "es" : "s") : unit) : "";
+        return `${formatQty(entry.qty)}${label ? ` ${label}` : ""}`;
+      }).filter(Boolean).join(" + ");
+    }
+    const prepWords = /\b(melted|softened|shredded|grated|chopped|diced|sliced|mashed|cooked|fresh|frozen|ripe|washed|finely|thinly|cold|warm|beaten|crushed|minced|cubed|peeled|drained|rinsed|seasonal)\b/g;
+    function cleanName(name) {
+      let cleaned = String(name).toLowerCase().replace(/\(.*?\)/g, " ").replace(/,?\s*optional\b/g, " ").replace(prepWords, " ").replace(/\s+/g, " ").trim();
+      for (let pass = 0; pass < 3; pass++) cleaned = cleaned.replace(/(,|\bor\b|\band\b)\s*$/, "").replace(/^\s*(,|\bor\b|\band\b)/, "").trim();
+      cleaned = cleaned || String(name).toLowerCase().trim();
+      return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+    }
+    function nameKey(name) { return name.toLowerCase().split(/[^a-z]+/).filter(Boolean).map(stem).join(" "); }
+    const groceryOrder = ["Produce", "Dairy & eggs", "Meat & seafood", "Bakery & grains", "Pantry", "Other"];
+    function groceryCategory(name) {
+      const text = name.toLowerCase();
+      if (/peanut butter|broth|sauce|baking|vanilla|sugar|salt|honey|syrup|\boil\b|cinnamon|cocoa|chocolate|vinegar|ketchup|mustard|soy|\bjam\b|salsa|marshmallow|raisin/.test(text)) return "Pantry";
+      if (/chicken|beef|pork|\bham\b|turkey|bacon|pepperoni|sausage|shrimp|lobster|tuna|salmon|fish|seafood|steak|meat/.test(text)) return "Meat & seafood";
+      if (/milk|butter|cheese|cheddar|mozzarella|parmesan|yogurt|cream|egg/.test(text)) return "Dairy & eggs";
+      if (/bread|\bbuns?\b|tortilla|pasta|spaghetti|macaroni|noodle|rice|\boats?\b|flour|cracker|granola|dough|pretzel|crumb|cereal|croissant|pita|ravioli|gnocchi/.test(text)) return "Bakery & grains";
+      if (/apple|banana|berry|berries|strawberr|blueberr|lemon|lime|orange|grape|avocado|tomato|onion|garlic|pepper|lettuce|cucumber|potato|carrot|celery|\bpeas?\b|corn|spinach|broccoli|mushroom|basil|parsley|cilantro|fruit|vegetable|veggie|salad|ginger|zucchini/.test(text)) return "Produce";
+      if (/beans|lentil|nut/.test(text)) return "Pantry";
+      return "Other";
+    }
+    function addRecipeToList(recipe, quiet = false) {
+      if (state.shopping.some((item) => item.parts.some((part) => part.recipeId === recipe.id))) { if (!quiet) notify(`${recipe.name} is already on your shopping list.`); return false; }
+      for (const ingredientEntry of buildRecipeDetails(recipe).ingredients) {
+        const name = cleanName(ingredientEntry.name);
+        const key = nameKey(name);
+        const { qty, unit } = parseAmount(ingredientEntry.amount);
+        let item = state.shopping.find((entry) => entry.key === key);
+        if (!item) { item = { key, name, parts: [], have: false }; state.shopping.push(item); }
+        item.parts.push({ recipeId: recipe.id, qty, unit });
+      }
+      saveProgress();
+      if (!quiet) notify(`Added ${recipe.name} to your shopping list.`);
+      return true;
+    }
+    function removeRecipeFromList(id) {
+      state.shopping = state.shopping.map((item) => ({ ...item, parts: item.parts.filter((part) => part.recipeId !== id) })).filter((item) => item.parts.length);
+      saveProgress();
+    }
+    function renderShopping() {
+      const items = state.shopping;
+      const toBuy = items.filter((item) => !item.have).length;
+      const listed = [...new Set(items.flatMap((item) => item.parts.map((part) => part.recipeId)))].filter((id) => id !== "custom");
+      const groups = groceryOrder.map((category) => [category, items.filter((item) => groceryCategory(item.name) === category).sort((a, b) => Number(a.have) - Number(b.have) || a.name.localeCompare(b.name))]).filter(([, list]) => list.length);
+      const sources = (item) => [...new Set(item.parts.map((part) => part.recipeId === "custom" ? "Added by you" : recipeById(part.recipeId)?.name || "Removed recipe"))].join(", ");
+      const pickerOptions = [...recipes].sort((a, b) => Number(state.favorites.includes(b.id)) - Number(state.favorites.includes(a.id)) || a.name.localeCompare(b.name)).map((recipe) => `<option value="${esc(recipe.id)}">${state.favorites.includes(recipe.id) ? "♥ " : ""}${esc(recipe.name)} (${esc(recipe.category)})</option>`).join("");
+      app.innerHTML = `<div class="screen-heading"><div><p class="eyebrow">Ready to shop</p><h1>Shopping list</h1><p>${items.length ? `${toBuy} to buy · ${items.length - toBuy} you already have` : "Ingredients from your recipes are combined here."}</p></div></div>
+        <section class="settings-section"><h2>Add ingredients</h2><form class="chat-form" id="list-recipe-form"><label class="sr-only" for="list-recipe">Recipe to add</label><select id="list-recipe" class="list-select">${pickerOptions}</select><button class="primary-button" type="submit">Add recipe</button></form><form class="chat-form add-item-form" id="list-item-form"><label class="sr-only" for="list-item-name">Item name</label><input id="list-item-name" maxlength="60" placeholder="Something else, like napkins" required><label class="sr-only" for="list-item-amount">Amount</label><input id="list-item-amount" class="amount-input" maxlength="20" placeholder="Amount (optional)"><button class="secondary-button" type="submit">Add item</button></form></section>
+        ${listed.length ? `<section class="settings-section"><h2>Recipes on this list</h2><div class="chip-row">${listed.map((id) => `<span class="chip removable">${esc(recipeById(id)?.name || "Removed recipe")} <button class="chip-x" data-remove-recipe="${esc(id)}" aria-label="Remove ${esc(recipeById(id)?.name || "recipe")} from the list">×</button></span>`).join("")}</div></section>` : ""}
+        ${groups.length ? groups.map(([category, list]) => `<section class="shop-group"><h2>${category}</h2><ul class="shop-list">${list.map((item) => `<li class="shop-item ${item.have ? "have" : ""}"><label class="shop-check"><input type="checkbox" data-have="${esc(item.key)}" ${item.have ? "checked" : ""} aria-label="I already have ${esc(item.name)}"><span class="shop-name">${esc(item.name)}</span></label><span class="shop-amount">${esc(amountLabel(item.parts))}</span><span class="shop-from">${esc(sources(item))}</span><button class="chip-x" data-remove-item="${esc(item.key)}" aria-label="Remove ${esc(item.name)}">×</button></li>`).join("")}</ul></section>`).join("") : `<p class="shelf-empty">Your list is empty. Add a recipe above, or tap "+ List" on any recipe card.</p>`}
+        ${items.length ? `<div class="danger-zone"><p>Tick "I already have this" to move an item to the bottom of its aisle.</p><span><button class="secondary-button" data-action="clear-have" ${items.some((item) => item.have) ? "" : "disabled"}>Remove items I have</button> <button class="danger-button" data-action="clear-all">Clear list</button></span></div>` : ""}`;
+      app.querySelector("#list-recipe-form").addEventListener("submit", (event) => { event.preventDefault(); const recipe = recipeById(app.querySelector("#list-recipe").value); if (recipe && addRecipeToList(recipe)) renderShopping(); });
+      app.querySelector("#list-item-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const name = cleanName(app.querySelector("#list-item-name").value.trim());
+        if (!name) return;
+        const { qty, unit } = parseAmount(app.querySelector("#list-item-amount").value);
+        const key = nameKey(name);
+        let item = state.shopping.find((entry) => entry.key === key);
+        if (!item) { item = { key, name, parts: [], have: false }; state.shopping.push(item); }
+        item.parts.push({ recipeId: "custom", qty, unit });
+        saveProgress();
+        renderShopping();
+        app.querySelector("#list-item-name").focus();
+      });
+      app.querySelectorAll("[data-have]").forEach((box) => box.addEventListener("change", () => { const item = state.shopping.find((entry) => entry.key === box.dataset.have); if (item) { item.have = box.checked; saveProgress(); renderShopping(); [...app.querySelectorAll("[data-have]")].find((el) => el.dataset.have === box.dataset.have)?.focus(); } }));
+      app.querySelectorAll("[data-remove-item]").forEach((button) => button.addEventListener("click", () => { state.shopping = state.shopping.filter((entry) => entry.key !== button.dataset.removeItem); saveProgress(); renderShopping(); }));
+      app.querySelectorAll("[data-remove-recipe]").forEach((button) => button.addEventListener("click", () => { removeRecipeFromList(button.dataset.removeRecipe); renderShopping(); }));
+      app.querySelector('[data-action="clear-have"]')?.addEventListener("click", () => { state.shopping = state.shopping.filter((entry) => !entry.have); saveProgress(); renderShopping(); });
+      app.querySelector('[data-action="clear-all"]')?.addEventListener("click", () => { if (!window.confirm("Clear your whole shopping list?")) return; state.shopping = []; saveProgress(); renderShopping(); });
+    }
+
+    // Meal planner.
+    const PLAN_SLOTS = [["Breakfast", ["Breakfast"]], ["Lunch", ["Lunch", "Snacks"]], ["Dinner", ["Dinner", "Hard", "Extreme"]], ["Dessert", ["Desserts", "Snacks"]]];
+    function renderPlanner() {
+      const start = addDays(weekStartKey(), state.weekOffset * 7);
+      const days = Array.from({ length: 7 }, (_, index) => addDays(start, index));
+      const today = dayKey();
+      const plannedId = (key, slot) => (state.plan[key] || {})[slot];
+      const planned = days.reduce((sum, key) => sum + PLAN_SLOTS.filter(([slot]) => recipeById(plannedId(key, slot))).length, 0);
+      const dayLabel = (key) => dateFromKey(key).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+      const pools = Object.fromEntries(PLAN_SLOTS.map(([slot, categories]) => [slot, recipes.filter((recipe) => categories.includes(recipe.category)).sort((a, b) => Number(state.favorites.includes(b.id)) - Number(state.favorites.includes(a.id)) || a.name.localeCompare(b.name))]));
+      const options = (slot, selected) => {
+        const extra = selected && !pools[slot].some((recipe) => recipe.id === selected.id) ? [selected] : [];
+        return `<option value="">Choose a recipe</option>${[...extra, ...pools[slot]].map((recipe) => `<option value="${esc(recipe.id)}" ${selected && selected.id === recipe.id ? "selected" : ""}>${state.favorites.includes(recipe.id) ? "♥ " : ""}${unlocked(recipe) ? "" : "🔒 "}${esc(recipe.name)}</option>`).join("")}`;
+      };
+      app.innerHTML = `<div class="screen-heading"><div><p class="eyebrow">Plan ahead</p><h1>Meal planner</h1><p>${planned} of ${days.length * PLAN_SLOTS.length} meals planned · ${esc(dateFromKey(days[0]).toLocaleDateString(undefined, { day: "numeric", month: "short" }))} to ${esc(dateFromKey(days[6]).toLocaleDateString(undefined, { day: "numeric", month: "short" }))}</p></div></div>
+        <div class="filter-row"><button class="filter-button" data-week="-1">← Previous week</button><button class="filter-button" data-week="0" aria-pressed="${state.weekOffset === 0}">This week</button><button class="filter-button" data-week="1">Next week →</button><button class="filter-button" data-action="fill">Fill empty meals</button><button class="filter-button" data-action="to-list" ${planned ? "" : "disabled"}>Add week to shopping list</button><button class="filter-button" data-action="clear-week" ${planned ? "" : "disabled"}>Clear week</button></div>
+        <div class="plan-grid">${days.map((key) => `<section class="plan-day ${key === today ? "today" : ""}" aria-label="${esc(dayLabel(key))}"><h3>${esc(dayLabel(key))}${key === today ? " · today" : ""}</h3>${PLAN_SLOTS.map(([slot]) => { const recipe = recipeById(plannedId(key, slot)); return `<div class="plan-slot"><label>${slot}<select data-plan="${key}|${slot}" aria-label="${slot} on ${esc(dayLabel(key))}">${options(slot, recipe)}</select></label>${recipe && unlocked(recipe) ? `<button class="text-button" data-cook="${esc(recipe.id)}">Cook this</button>` : recipe ? `<span class="chef-note">Locked until ${recipe.unlock} stars</span>` : ""}</div>`; }).join("")}</section>`).join("")}</div>`;
+      app.querySelectorAll("[data-plan]").forEach((select) => select.addEventListener("change", () => {
+        const [key, slot] = select.dataset.plan.split("|");
+        if (select.value) state.plan[key] = { ...(state.plan[key] || {}), [slot]: select.value };
+        else if (state.plan[key]) { delete state.plan[key][slot]; if (!Object.keys(state.plan[key]).length) delete state.plan[key]; }
+        saveProgress();
+        renderPlanner();
+        [...app.querySelectorAll("[data-plan]")].find((el) => el.dataset.plan === select.dataset.plan)?.focus();
+      }));
+      app.querySelectorAll("[data-week]").forEach((button) => button.addEventListener("click", () => { const step = Number(button.dataset.week); state.weekOffset = step === 0 ? 0 : state.weekOffset + step; renderPlanner(); }));
+      app.querySelector('[data-action="fill"]').addEventListener("click", () => {
+        const used = new Set(days.flatMap((key) => PLAN_SLOTS.map(([slot]) => plannedId(key, slot)).filter(Boolean)));
+        let added = 0;
+        for (const key of days) for (const [slot] of PLAN_SLOTS) {
+          if (recipeById(plannedId(key, slot))) continue;
+          const open = pools[slot].filter(unlocked);
+          const fresh = open.filter((recipe) => !used.has(recipe.id));
+          const choice = (fresh.length ? fresh : open)[Math.floor(Math.random() * (fresh.length ? fresh : open).length)];
+          if (!choice) continue;
+          state.plan[key] = { ...(state.plan[key] || {}), [slot]: choice.id };
+          used.add(choice.id);
+          added++;
+        }
+        saveProgress();
+        renderPlanner();
+        notify(added ? `Filled ${added} empty ${added === 1 ? "meal" : "meals"}.` : "Every meal is already planned.");
+      });
+      app.querySelector('[data-action="to-list"]').addEventListener("click", () => {
+        const ids = [...new Set(days.flatMap((key) => PLAN_SLOTS.map(([slot]) => plannedId(key, slot)).filter(Boolean)))];
+        const results = ids.map((id) => recipeById(id)).filter(Boolean).map((recipe) => addRecipeToList(recipe, true));
+        const added = results.filter(Boolean).length;
+        notify(added ? `Added ${added} ${added === 1 ? "recipe" : "recipes"} to your shopping list.` : "Those recipes are already on your shopping list.");
+      });
+      app.querySelector('[data-action="clear-week"]').addEventListener("click", () => { if (!window.confirm("Clear every meal planned this week?")) return; days.forEach((key) => delete state.plan[key]); saveProgress(); renderPlanner(); });
+      bindCookButtons();
+    }
+
+    // Explore recipes.
+    function dailyRecipe(salt = "feature") {
+      const pool = recipes.filter((recipe) => !recipe.personal && recipe.difficulty === "Easy");
+      return pool[hashText(`${salt}:${dayKey()}`) % pool.length];
+    }
+    function matchByIngredients(text) {
+      if (!vocabulary) vocabulary = new Set(recipes.flatMap((recipe) => [...recipeWords(recipe)]));
+      const wanted = [...new Set(wordsOf(text).filter((word) => vocabulary.has(word)))];
+      const ranked = wanted.length ? recipes.filter(unlocked).map((recipe) => ({ recipe, hits: wanted.filter((word) => recipeWords(recipe).has(word)) })).filter((item) => item.hits.length).sort((a, b) => b.hits.length - a.hits.length || ingredientCount(a.recipe) - ingredientCount(b.recipe)).slice(0, 9) : [];
+      return { wanted, ranked };
+    }
+    function renderExplore() {
+      const open = recipes.filter(unlocked);
+      const today = dayKey();
+      const pick = state.exploreSurprise && recipeById(state.exploreSurprise);
+      const feature = pick || dailyRecipe();
+      const rows = [
+        ["Quick bites: 15 minutes or less", open.filter((recipe) => minutesOf(recipe) <= 15)],
+        ["Few ingredients: 4 or fewer", open.filter((recipe) => ingredientCount(recipe) <= 4)],
+        ["Try something new", seededShuffle(open.filter((recipe) => !state.completed.includes(recipe.id)), today)],
+        ["Sweet treats", open.filter((recipe) => recipe.category === "Desserts")],
+        ["Ready for a challenge", seededShuffle(recipes.filter((recipe) => recipe.difficulty !== "Easy"), today)]
+      ].map(([title, list]) => [title, list.slice(0, 6)]).filter(([, list]) => list.length);
+      const query = state.exploreQuery.trim();
+      const found = query ? matchByIngredients(query) : null;
+      app.innerHTML = `<div class="screen-heading"><div><p class="eyebrow">Find your next dish</p><h1>Explore recipes</h1><p>Discover something new, or cook with what you have.</p></div></div>
+        <section class="feature" aria-label="${pick ? "Your surprise recipe" : "Recipe of the day"}"><div class="feature-copy"><p class="eyebrow">${pick ? "Your surprise" : "Recipe of the day"}</p><h2>${esc(feature.name)}</h2><div class="feature-meta"><span>◷ ${esc(feature.time)}</span><span>${esc(feature.category)}</span><span>${ingredientCount(feature)} ingredients</span></div><div class="card-actions"><button class="primary-button" data-cook="${esc(feature.id)}">Cook this&nbsp; →</button><button class="secondary-button" data-list="${esc(feature.id)}">+ List</button><button class="secondary-button" data-action="surprise">🎲 Surprise me</button></div></div><div class="feature-photo" style="${recipeImage(feature)}" role="img" aria-label="${esc(feature.name)}"></div></section>
+        <section class="settings-section"><h2>What's in your kitchen?</h2><form class="chat-form" id="explore-form"><label class="sr-only" for="explore-input">Ingredients you have</label><input id="explore-input" maxlength="120" autocomplete="off" placeholder="Try: eggs, banana, cheese" value="${esc(state.exploreQuery)}"><button class="primary-button" type="submit">Find recipes</button>${query ? `<button class="secondary-button" type="button" data-action="clear-search">Clear</button>` : ""}</form></section>
+        ${found ? `<section class="settings-section"><h2>${found.ranked.length ? `Recipes you can make with ${esc(found.wanted.join(", "))}` : "No matches"}</h2>${found.ranked.length ? `<div class="recipe-grid">${found.ranked.map((item) => `<div class="match-wrap">${recipeCard(item.recipe)}<p class="chef-note">Uses ${esc(item.hits.join(", "))}</p></div>`).join("")}</div>` : `<p class="shelf-empty">${found.wanted.length ? "None of your unlocked recipes use those ingredients yet." : "I did not recognise any ingredients there. Try words like eggs, banana or cheese."}</p>`}</section>` : ""}
+        ${rows.map(([title, list]) => `<section class="settings-section"><h2>${esc(title)}</h2><div class="recipe-grid">${list.map(recipeCard).join("")}</div></section>`).join("")}`;
+      app.querySelector("#explore-form").addEventListener("submit", (event) => { event.preventDefault(); state.exploreQuery = app.querySelector("#explore-input").value; renderExplore(); app.querySelector("#explore-input").focus(); });
+      app.querySelector('[data-action="clear-search"]')?.addEventListener("click", () => { state.exploreQuery = ""; renderExplore(); });
+      app.querySelector('[data-action="surprise"]').addEventListener("click", () => {
+        const fresh = open.filter((recipe) => !state.completed.includes(recipe.id) && recipe.id !== feature.id);
+        const pool = fresh.length ? fresh : open.filter((recipe) => recipe.id !== feature.id);
+        if (pool.length) state.exploreSurprise = pool[Math.floor(Math.random() * pool.length)].id;
+        renderExplore();
+      });
+      bindHearts(renderExplore);
+      bindCookButtons();
+      bindListButtons();
+    }
+
+    // Cooking academy.
+    function renderAcademy() {
+      const lesson = state.academy && LESSONS.find((item) => item.id === state.academy.id);
+      if (lesson) { renderLesson(lesson); return; }
+      const done = state.lessons.filter((id) => LESSONS.some((item) => item.id === id)).length;
+      app.innerHTML = `<div class="screen-heading"><div><p class="eyebrow">Learn the basics</p><h1>Cooking academy</h1><p>${done} of ${LESSONS.length} lessons complete. Pass each short quiz to earn a star.</p></div></div>
+        <div class="progress-track" role="progressbar" aria-label="Lessons complete" aria-valuemin="0" aria-valuemax="${LESSONS.length}" aria-valuenow="${done}"><div class="progress-fill" style="width:${Math.round(done / LESSONS.length * 100)}%"></div></div>
+        <div class="lesson-grid">${LESSONS.map((item) => { const complete = state.lessons.includes(item.id); return `<article class="lesson-card ${complete ? "complete" : ""}"><div class="lesson-icon" aria-hidden="true">${item.icon}</div><h2>${esc(item.title)}</h2><p>${item.points.length} tips · ${item.quiz.length} question quiz · ${item.minutes} min</p><button class="${complete ? "secondary-button" : "primary-button"}" data-lesson="${item.id}">${complete ? "✓ Review lesson" : "Start lesson"}</button></article>`; }).join("")}</div>`;
+      app.querySelectorAll("[data-lesson]").forEach((button) => button.addEventListener("click", () => { state.academy = { id: button.dataset.lesson, view: "learn", q: 0, correct: 0, picked: null, reward: false }; renderAcademy(); }));
+    }
+    function renderLesson(lesson) {
+      const session = state.academy;
+      const back = `<button class="secondary-button" data-action="lessons">←&nbsp; All lessons</button>`;
+      if (session.view === "learn") {
+        app.innerHTML = `<div class="screen-heading"><div><p class="eyebrow">Lesson</p><h1>${lesson.icon} ${esc(lesson.title)}</h1><p>${esc(lesson.intro)}</p></div>${back}</div><section class="settings-section"><h2>What to remember</h2><ol class="lesson-points">${lesson.points.map((point) => `<li>${esc(point)}</li>`).join("")}</ol><button class="primary-button" data-action="quiz">Take the quiz&nbsp; →</button></section>`;
+        app.querySelector('[data-action="quiz"]').addEventListener("click", () => { session.view = "quiz"; renderAcademy(); });
+      } else if (session.view === "quiz") {
+        const [question, answers, correct, why] = lesson.quiz[session.q];
+        const answered = session.picked !== null;
+        app.innerHTML = `<div class="screen-heading"><div><p class="eyebrow">Question ${session.q + 1} of ${lesson.quiz.length}</p><h1>${esc(lesson.title)}</h1></div>${back}</div><section class="settings-section"><h2>${esc(question)}</h2><div class="choice-list">${answers.map((answer, index) => `<button class="choice-button ${answered && index === correct ? "correct" : ""} ${answered && index === session.picked && index !== correct ? "incorrect" : ""}" data-answer="${index}" ${answered ? "disabled" : ""}><span class="choice-letter">${String.fromCharCode(65 + index)}</span><span class="choice-text">${esc(answer)}</span></button>`).join("")}</div>${answered ? `<p class="cook-feedback" role="status">${session.picked === correct ? "Correct! " : "Not quite. "}${esc(why)}</p><div class="action-row"><button class="primary-button" data-action="next-question">${session.q === lesson.quiz.length - 1 ? "See my result" : "Next question"}&nbsp; →</button></div>` : ""}</section>`;
+        app.querySelectorAll("[data-answer]").forEach((button) => button.addEventListener("click", () => {
+          if (session.picked !== null) return;
+          session.picked = Number(button.dataset.answer);
+          if (session.picked === correct) session.correct++;
+          renderAcademy();
+        }));
+        app.querySelector('[data-action="next-question"]')?.addEventListener("click", () => {
+          if (session.q < lesson.quiz.length - 1) { session.q++; session.picked = null; }
+          else {
+            session.view = "result";
+            if (session.correct >= 2 && !state.lessons.includes(lesson.id)) { state.lessons.push(lesson.id); state.stars += 1; session.reward = true; saveProgress(); }
+          }
+          renderAcademy();
+        });
+      } else {
+        const passed = session.correct >= 2;
+        app.innerHTML = `<div class="screen-heading"><div><p class="eyebrow">Quiz result</p><h1>${passed ? "Lesson complete!" : "Nearly there"}</h1><p>You got ${session.correct} of ${lesson.quiz.length} right.</p></div>${back}</div><section class="settings-section">${passed ? `<p class="reward">${session.reward ? "★ +1 star earned" : "Lesson already completed"}</p>` : `<p>Get at least 2 right to pass. Read the tips again and have another go.</p>`}<div class="action-row"><button class="secondary-button" data-action="retry">${passed ? "Review the lesson" : "Read the tips again"}</button></div></section>`;
+        app.querySelector('[data-action="retry"]').addEventListener("click", () => { state.academy = { id: lesson.id, view: "learn", q: 0, correct: 0, picked: null, reward: false }; renderAcademy(); });
+      }
+      app.querySelector('[data-action="lessons"]').addEventListener("click", () => { state.academy = null; renderAcademy(); });
+    }
+
+    // Challenges and weekly goals.
+    const MYSTERY_INGREDIENTS = ["banana", "egg", "cheese", "tomato", "strawberry", "bread", "milk", "chicken", "butter", "yogurt", "rice", "potato", "apple", "lemon", "onion", "pasta"];
+    function usesIngredient(recipe, word) { return buildRecipeDetails(recipe).ingredients.some((item) => wordsOf(item.name).includes(word)); }
+    function mysteryIngredient(date) {
+      const pool = MYSTERY_INGREDIENTS.filter((word) => recipes.filter((recipe) => !recipe.personal && recipe.difficulty === "Easy" && usesIngredient(recipe, word)).length >= 2);
+      return pool[hashText(`mystery:${date}`) % pool.length];
+    }
+    function dailyChallenges() {
+      const today = dayKey();
+      const featured = dailyRecipe("daily");
+      const mystery = mysteryIngredient(today);
+      const cookedToday = state.cookedLog.filter((entry) => entry.date === today).map((entry) => recipeById(entry.id)).filter(Boolean);
+      const easy = recipes.filter((recipe) => !recipe.personal);
+      return [
+        { id: "daily", icon: "🍳", title: `Cook ${featured.name}`, text: "Today's featured dish.", reward: 2, done: cookedToday.some((recipe) => recipe.id === featured.id), recipes: [featured] },
+        { id: "mystery", icon: "❓", title: state.challenges.revealed[today] ? `Mystery ingredient: ${mystery}` : "Mystery ingredient", text: state.challenges.revealed[today] ? `Cook any recipe that uses ${mystery}.` : "Reveal today's ingredient, then cook a recipe that uses it.", reward: 2, done: cookedToday.some((recipe) => usesIngredient(recipe, mystery)), mystery, recipes: state.challenges.revealed[today] ? easy.filter((recipe) => unlocked(recipe) && usesIngredient(recipe, mystery)).slice(0, 3) : [] },
+        { id: "three", icon: "3️⃣", title: "3-ingredient challenge", text: "Cook any recipe with 3 ingredients or fewer.", reward: 2, done: cookedToday.some((recipe) => ingredientCount(recipe) <= 3), recipes: seededShuffle(easy.filter((recipe) => unlocked(recipe) && ingredientCount(recipe) <= 3), today).slice(0, 3) }
+      ];
+    }
+    const WEEKLY_GOALS = [
+      { id: "cook5", title: "Cook 5 recipes", target: 5, reward: 3, measure: (log) => log.length },
+      { id: "days3", title: "Cook on 3 different days", target: 3, reward: 3, measure: (log) => new Set(log.map((entry) => entry.date)).size },
+      { id: "cats3", title: "Cook from 3 different categories", target: 3, reward: 3, measure: (log) => new Set(log.map((entry) => recipeById(entry.id)?.category).filter(Boolean)).size },
+      { id: "new2", title: "Try 2 recipes for the first time", target: 2, reward: 3, measure: (log) => log.filter((entry) => entry.first).length }
+    ];
+    function claimReward(key, reward) {
+      if (state.challenges.claimed[key]) return;
+      state.challenges.claimed[key] = true;
+      state.stars += reward;
+      saveProgress();
+      renderChallenges();
+      notify(`★ +${reward} stars claimed!`);
+    }
+    function renderChallenges() {
+      const today = dayKey();
+      const week = weekStartKey();
+      const weekEntries = state.cookedLog.filter((entry) => entry.date >= week && entry.date <= addDays(week, 6));
+      const daily = dailyChallenges();
+      const claimButton = (key, done, reward) => state.challenges.claimed[key] ? `<span class="status-chip done">✓ Claimed</span>` : done ? `<button class="primary-button" data-claim="${esc(key)}" data-reward="${reward}">Claim ★ ${reward}</button>` : `<span class="status-chip">★ ${reward} reward</span>`;
+      app.innerHTML = `<div class="screen-heading"><div><p class="eyebrow">New every day</p><h1>Challenges</h1><p>Cook to complete a challenge, then claim your stars. Daily challenges refresh at midnight.</p></div></div>
+        <section class="settings-section"><h2>Today's challenges</h2><div class="challenge-list">${daily.map((item) => `<article class="challenge-card ${item.done ? "done" : ""}"><div class="challenge-top"><span class="lesson-icon" aria-hidden="true">${item.icon}</span><div><h3>${esc(item.title)}</h3><p>${esc(item.text)}</p></div>${claimButton(`d:${today}:${item.id}`, item.done, item.reward)}</div>${item.id === "mystery" && !state.challenges.revealed[today] ? `<button class="secondary-button" data-action="reveal">Reveal today's ingredient</button>` : ""}${item.recipes.length ? `<div class="recipe-grid">${item.recipes.map(recipeCard).join("")}</div>` : ""}</article>`).join("")}</div></section>
+        <section class="settings-section"><h2>Weekly goals</h2><p>Week of ${esc(dateFromKey(week).toLocaleDateString(undefined, { day: "numeric", month: "short" }))}. Goals reset every Monday.</p><div class="challenge-list">${WEEKLY_GOALS.map((goal) => { const value = Math.min(goal.measure(weekEntries), goal.target); const done = value >= goal.target; return `<article class="challenge-card ${done ? "done" : ""}"><div class="challenge-top"><div><h3>${esc(goal.title)}</h3><p>${value} of ${goal.target}</p></div>${claimButton(`w:${week}:${goal.id}`, done, goal.reward)}</div><div class="progress-track" role="progressbar" aria-label="${esc(goal.title)}" aria-valuemin="0" aria-valuemax="${goal.target}" aria-valuenow="${value}"><div class="progress-fill" style="width:${Math.round(value / goal.target * 100)}%"></div></div></article>`; }).join("")}</div></section>`;
+      app.querySelectorAll("[data-claim]").forEach((button) => button.addEventListener("click", () => claimReward(button.dataset.claim, Number(button.dataset.reward))));
+      app.querySelector('[data-action="reveal"]')?.addEventListener("click", () => { state.challenges.revealed[today] = true; saveProgress(); renderChallenges(); });
+      bindHearts(renderChallenges);
+      bindCookButtons();
+      bindListButtons();
+    }
+
+    // Achievements.
+    function renderAchievements() {
+      const earned = ACHIEVEMENTS.filter((item) => item.value() >= item.target);
+      app.innerHTML = `<div class="screen-heading"><div><p class="eyebrow">Your trophy shelf</p><h1>Achievements</h1><p>${earned.length} of ${ACHIEVEMENTS.length} badges earned.</p></div></div>
+        <div class="badge-grid">${ACHIEVEMENTS.map((item) => { const value = Math.min(item.value(), item.target); const done = value >= item.target; return `<article class="badge-card ${done ? "earned" : ""}"><div class="badge-icon" aria-hidden="true">${item.icon}</div><h2>${esc(item.title)}</h2><p>${esc(item.text)}</p>${done ? `<span class="status-chip done">✓ Earned</span>` : `<div class="progress-track" role="progressbar" aria-label="${esc(item.title)} progress" aria-valuemin="0" aria-valuemax="${item.target}" aria-valuenow="${value}"><div class="progress-fill" style="width:${Math.round(value / item.target * 100)}%"></div></div><span class="chef-note">${value} of ${item.target}</span>`}</article>`; }).join("")}</div>`;
+    }
+
+    // Food gallery.
+    function resizeImage(file, max = 560) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const image = new Image();
+        image.onload = () => {
+          const scale = Math.min(1, max / Math.max(image.width, image.height));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(image.width * scale));
+          canvas.height = Math.max(1, Math.round(image.height * scale));
+          const context = canvas.getContext("2d");
+          URL.revokeObjectURL(url);
+          if (!context) { reject(new Error("Canvas is not available")); return; }
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/jpeg", 0.72));
+        };
+        image.onerror = () => { URL.revokeObjectURL(url); reject(new Error("That file is not a readable image")); };
+        image.src = url;
+      });
+    }
+    const MAX_PHOTOS = 24;
+    function renderGallery() {
+      const entries = [...state.gallery].reverse();
+      const photos = state.gallery.filter((entry) => safePhoto(entry.photo)).length;
+      app.innerHTML = `<div class="screen-heading"><div><p class="eyebrow">Proud of it</p><h1>My food gallery</h1><p>${state.gallery.length} ${state.gallery.length === 1 ? "dish" : "dishes"} cooked · ${photos} of ${MAX_PHOTOS} photo spots used. Photos stay on this device.</p></div></div>
+        ${entries.length ? `<div class="gallery-grid">${entries.map((entry) => { const recipe = recipeById(entry.recipeId); const photo = safePhoto(entry.photo); const name = recipe ? recipe.name : "A deleted recipe"; const style = photo ? `background-image:url('${photo}')` : recipe ? recipeImage(recipe) : ""; return `<article class="gallery-card"><div class="gallery-photo" style="${style}" role="img" aria-label="${photo ? "Your photo of " : ""}${esc(name)}"></div><div class="gallery-body"><h2>${esc(name)}</h2><p class="chef-note">${esc(dateFromKey(entry.date).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }))}${photo ? "" : " · illustration"}</p><label class="sr-only" for="cap-${esc(entry.id)}">Caption for ${esc(name)}</label><input id="cap-${esc(entry.id)}" class="caption-input" data-caption="${esc(entry.id)}" maxlength="80" placeholder="Add a caption" value="${esc(entry.caption || "")}"><div class="card-actions"><label class="secondary-button file-button">${photo ? "Change photo" : "Add photo"}<input type="file" accept="image/*" data-photo="${esc(entry.id)}" class="sr-only"></label>${photo ? `<button class="secondary-button" data-remove-photo="${esc(entry.id)}">Remove photo</button>` : ""}<button class="danger-button" data-delete-entry="${esc(entry.id)}">Delete</button></div></div></article>`; }).join("")}</div>` : `<p class="shelf-empty">Nothing here yet. Finish a recipe and your dish will appear in your gallery.</p>`}`;
+      app.querySelectorAll("[data-caption]").forEach((input) => input.addEventListener("change", () => { const entry = state.gallery.find((item) => item.id === input.dataset.caption); if (entry) { entry.caption = input.value.trim().slice(0, 80); saveProgress(); } }));
+      app.querySelectorAll("[data-photo]").forEach((input) => input.addEventListener("change", () => {
+        const entry = state.gallery.find((item) => item.id === input.dataset.photo);
+        const file = input.files && input.files[0];
+        if (!entry || !file) return;
+        if (!/^image\//.test(file.type)) { notify("Please choose an image file."); return; }
+        if (file.size > 15 * 1024 * 1024) { notify("That photo is too large. Choose one under 15 MB."); return; }
+        if (!safePhoto(entry.photo) && state.gallery.filter((item) => safePhoto(item.photo)).length >= MAX_PHOTOS) { notify(`You can keep ${MAX_PHOTOS} photos. Remove one to add another.`); return; }
+        resizeImage(file).then((dataUrl) => { entry.photo = dataUrl; saveProgress(); renderGallery(); notify("Photo added to your gallery."); }).catch(() => notify("Sorry, that photo could not be added."));
+      }));
+      app.querySelectorAll("[data-remove-photo]").forEach((button) => button.addEventListener("click", () => { const entry = state.gallery.find((item) => item.id === button.dataset.removePhoto); if (entry) { entry.photo = ""; saveProgress(); renderGallery(); } }));
+      app.querySelectorAll("[data-delete-entry]").forEach((button) => button.addEventListener("click", () => { if (!window.confirm("Delete this dish from your gallery?")) return; state.gallery = state.gallery.filter((item) => item.id !== button.dataset.deleteEntry); saveProgress(); renderGallery(); }));
+    }
+    function deletePersonalRecipe(recipe) {
+      if (!window.confirm(`Delete "${recipe.name}"? This cannot be undone.`)) return;
+      recipes.splice(recipes.indexOf(recipe), 1);
+      state.personalRecipes = state.personalRecipes.filter((item) => item.id !== recipe.id);
+      state.favorites = state.favorites.filter((id) => id !== recipe.id);
+      state.completed = state.completed.filter((id) => id !== recipe.id);
+      delete state.notes[recipe.id];
+      delete state.ratings[recipe.id];
+      for (const key of Object.keys(state.plan)) { for (const slot of Object.keys(state.plan[key])) if (state.plan[key][slot] === recipe.id) delete state.plan[key][slot]; if (!Object.keys(state.plan[key]).length) delete state.plan[key]; }
+      removeRecipeFromList(recipe.id);
+      saveProgress();
+      renderBook();
+      notify(`${recipe.name} was deleted.`);
+    }
+    function renderProfile() {
+      const streak = currentStreak();
+      const today = dayKey();
+      const best = state.streak.best;
+      const level = Math.floor(state.stars / 3) + 1;
+      const message = cookedToday() ? "You cooked today. Come back tomorrow to keep it going!" : streak > 0 ? `Cook a recipe today to keep your ${streak}-day streak alive.` : state.streak.lastCookDate ? "Your streak ended. Cook a recipe today to start a new one." : "Cook a recipe today to start your first streak.";
+      const week = Array.from({ length: 7 }, (_, index) => { const date = new Date(); date.setDate(date.getDate() - (6 - index)); const key = dayKey(date); return { cooked: state.streak.days.includes(key), today: key === today, label: date.toLocaleDateString(undefined, { weekday: "short" }) }; });
+      const milestones = [3, 7, 14, 30];
+      const next = milestones.find((days) => days > streak);
+      const nextText = next ? `${next - streak} more ${next - streak === 1 ? "day" : "days"} to a ${next}-day streak` : "You have reached every streak milestone!";
+      const cooked = state.completed.map((id) => recipes.find((recipe) => recipe.id === id)).filter(Boolean);
+      app.innerHTML = `<div class="screen-heading"><div><p class="eyebrow">My chef profile</p><h1>${esc(preferences.displayName || "Chef")}</h1><p>Level ${level} · ${state.stars} stars · ${cooked.length} ${cooked.length === 1 ? "recipe" : "recipes"} cooked</p></div><div class="chef-face" aria-hidden="true">${esc(preferences.avatar || "👩‍🍳")}</div></div>
+        <section class="streak-card" aria-label="Daily cooking streak"><div class="streak-main"><span class="streak-flame" aria-hidden="true">🔥</span><div><div class="streak-number">${streak}</div><div class="streak-label">${streak === 1 ? "day" : "days"} cooking streak</div></div></div><p class="streak-message">${message}</p><div class="streak-week" role="list" aria-label="Last 7 days">${week.map((day) => `<div class="streak-day ${day.cooked ? "cooked" : ""} ${day.today ? "today" : ""}" role="listitem" aria-label="${day.label}: ${day.cooked ? "cooked" : "no cooking"}${day.today ? ", today" : ""}"><span class="streak-dot" aria-hidden="true">${day.cooked ? "✓" : ""}</span><span>${day.label}</span></div>`).join("")}</div><div class="streak-foot"><span>Best streak: <strong>${best} ${best === 1 ? "day" : "days"}</strong></span><span>${nextText}</span></div><div class="badge-row">${milestones.map((days) => `<span class="badge ${best >= days ? "earned" : ""}">${days}-day streak${best >= days ? " ✓" : " (locked)"}</span>`).join("")}</div></section>
+        <section class="settings-section"><h2>Recipes you've cooked</h2>${cooked.length ? `<div class="chip-row">${cooked.slice(0, 20).map((recipe) => `<span class="chip">${esc(recipe.name)}</span>`).join("")}${cooked.length > 20 ? `<span class="chip">+ ${cooked.length - 20} more</span>` : ""}</div>` : "<p>Nothing yet. Cook your first recipe to see it here.</p>"}</section>`;
+    }
+    function renderSettings() {
+      const safeName = (preferences.displayName || "Chef").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      app.innerHTML = `<div class="screen-heading"><div><p class="eyebrow">Make it yours</p><h1>Settings</h1><p>Manage your chef profile and kitchen preferences.</p></div></div>
+        <section class="settings-section"><h2>Account</h2><p>Your profile and game progress are saved on this device. This app does not use online sign-in or cloud sync.</p><form class="profile-form" id="profile-form"><label class="field-label" for="display-name">Display name<input id="display-name" name="displayName" maxlength="24" autocomplete="nickname" value="${safeName}" required></label><label class="field-label" for="chef-avatar">Chef avatar<select id="chef-avatar" name="avatar"><option value="👩‍🍳" ${preferences.avatar === "👩‍🍳" ? "selected" : ""}>👩‍🍳 Chef</option><option value="👨‍🍳" ${preferences.avatar === "👨‍🍳" ? "selected" : ""}>👨‍🍳 Chef</option><option value="🧑‍🍳" ${preferences.avatar === "🧑‍🍳" ? "selected" : ""}>🧑‍🍳 Chef</option><option value="🥄" ${preferences.avatar === "🥄" ? "selected" : ""}>🥄 Ladle</option></select></label><button class="primary-button" type="submit">Save profile</button></form></section>
+        <section class="settings-section"><h2>Preferences</h2><p>Choose what help appears and how the kitchen looks.</p><div class="settings-list"><div class="setting-row"><div class="setting-copy"><strong>Cooking tips</strong><span>Show technique and safety notes during recipes.</span></div><label class="switch"><input type="checkbox" data-preference="showTips" ${preferences.showTips ? "checked" : ""} aria-label="Show cooking tips"><span class="switch-track"></span></label></div><div class="setting-row"><div class="setting-copy"><strong>Larger text</strong><span>Make recipe and lesson text easier to read.</span></div><label class="switch"><input type="checkbox" data-preference="largeText" ${preferences.largeText ? "checked" : ""} aria-label="Use larger text"><span class="switch-track"></span></label></div><div class="setting-row"><div class="setting-copy"><strong>Reduce motion</strong><span>Limit animations and transitions.</span></div><label class="switch"><input type="checkbox" data-preference="reduceMotion" ${preferences.reduceMotion ? "checked" : ""} aria-label="Reduce motion"><span class="switch-track"></span></label></div></div></section>
+        <section class="settings-section"><h2>Game progress</h2><p>You have ${state.stars} stars and have cooked ${state.completed.length} ${state.completed.length === 1 ? "recipe" : "recipes"}.</p><div class="danger-zone"><p>Reset stars and recipe completions on this device.</p><button class="danger-button" data-action="reset">Reset progress</button></div></section>`;
+      app.querySelector("#profile-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        preferences.displayName = app.querySelector("#display-name").value.trim() || "Chef";
+        preferences.avatar = app.querySelector("#chef-avatar").value;
+        savePreferences();
+        notify("Your chef profile is saved on this device.");
+        renderSettings();
+      });
+      app.querySelectorAll("[data-preference]").forEach((input) => input.addEventListener("change", () => {
+        preferences[input.dataset.preference] = input.checked;
+        savePreferences();
+      }));
+      app.querySelector('[data-action="reset"]').addEventListener("click", () => {
+        if (!window.confirm("Reset all stars and cooked recipes on this device? This cannot be undone.")) return;
+        state.stars = 0;
+        state.completed = [];
+        state.streak = emptyStreak();
+        saveProgress();
+        renderSettings();
+        notify("Game progress has been reset.");
+      });
+    }
+    function renderCook() {
+      const recipe = currentRecipe();
+      const recipeData = buildRecipeDetails(recipe);
+      const steps = recipeData.steps;
+      if (state.stage === "complete") {
+        const firstCook = !state.completed.includes(recipe.id);
+        const reward = firstCook ? 3 : 1;
+        app.innerHTML = `<div class="screen-heading"><div><p class="eyebrow">Kitchen victory</p><h1>That was delicious!</h1><p>You made ${recipe.name}.</p></div></div><div class="cook-layout"><section class="cook-panel"><div class="cook-image" style="${recipeImage(recipe)}" role="img" aria-label="${recipe.name}"></div><div class="cook-body celebration"><div class="celebration-icon" aria-hidden="true">🍽️</div><h2>Look at what you made!</h2><p>${firstCook ? "First time cooking this recipe? You earned a full set of stars!" : "Every time you cook, your kitchen skills get a little sharper."}</p><div class="reward" aria-label="Earned ${reward} stars">★ +${reward} stars</div><p class="streak-note" id="streak-note"></p><button class="primary-button" data-action="home">Back to my kitchen&nbsp; →</button></div></section><aside class="learn-panel"><div class="learn-top"><span class="learn-icon" aria-hidden="true">✦</span><h3>New skill unlocked</h3></div><p>${esc(skillFor(recipe))}: every step you finish builds a real kitchen skill.</p><div class="learn-divider"></div><div class="recipe-facts"><div class="recipe-fact"><span>Recipe</span><strong>${recipe.name}</strong></div><div class="recipe-fact"><span>Challenge</span><strong>${recipe.difficulty}</strong></div><div class="recipe-fact"><span>Kitchen skill</span><strong>${skillFor(recipe)}</strong></div></div></aside></div>`;
+        if (!state.rewardGranted) {
+          state.stars += reward;
+          if (firstCook) state.completed.push(recipe.id);
+          state.rewardGranted = true;
+          recordCook();
+          saveProgress();
+          if (state.stars >= 9 && firstCook) setTimeout(() => notify("Hard recipes unlocked! Try one from your recipe book."), 250);
+          if (state.stars >= 24 && firstCook) setTimeout(() => notify("Extreme recipes unlocked! Ready for the big challenge?"), 350);
+        }
+        app.querySelector("#streak-note").textContent = cookedToday() ? `🔥 ${currentStreak()}-day cooking streak!` : "";
+        app.querySelector('[data-action="home"]').addEventListener("click", () => { state.screen = "home"; render(); });
+        return;
+      }
+      const ingredients = recipeData.ingredients;
+      const inSteps = state.stage === "steps";
+      const last = state.step >= steps.length - 1;
+      const servingsLabel = typeof recipeData.servings === "number" ? `Makes ${recipeData.servings} ${recipeData.servings === 1 ? "serving" : "servings"}` : "Amounts as written";
+      const activity = !inSteps
+        ? `<h2>Gather your ingredients</h2><p class="cook-prompt">Measure each ingredient and check it off. ${ingredients.length - state.picked.length} left to gather.</p><ul class="check-list">${ingredients.map((item, index) => { const on = state.picked.includes(index); return `<li><label class="check-item ${on ? "checked" : ""}"><input type="checkbox" data-ingredient="${index}" ${on ? "checked" : ""}><span class="check-amount">${esc(item.amount)}</span><span class="check-name">${esc(item.name)}</span></label></li>`; }).join("")}</ul><div class="action-row"><button class="primary-button" data-action="next" ${state.picked.length === ingredients.length ? "" : "disabled"}>Start cooking&nbsp; →</button></div>`
+        : `<h2><span class="step-number">${state.step + 1}</span>Step ${state.step + 1} of ${steps.length}</h2><p class="step-text">${esc(steps[state.step])}</p><div class="action-row split"><button class="secondary-button" data-action="back" ${state.step === 0 ? "disabled" : ""}>←&nbsp; Back</button><button class="primary-button" data-action="next">${last ? "Finish cooking" : "Done, next step"}&nbsp; →</button></div>`;
+      const done = inSteps ? state.step : 0;
+      const percent = steps.length ? Math.round(done / steps.length * 100) : 0;
+      const progressBar = `<div class="cook-progress"><div class="cook-progress-text"><strong>${done} of ${steps.length} steps finished</strong><span>${steps.length - done} left${inSteps ? "" : " · gather ingredients first"}</span></div><div class="progress-track" role="progressbar" aria-label="Steps finished" aria-valuemin="0" aria-valuemax="${steps.length}" aria-valuenow="${done}" aria-valuetext="${done} of ${steps.length} steps finished"><div class="progress-fill" style="width:${percent}%"></div></div></div>`;
+      const sheet = `<aside class="recipe-sheet" aria-label="Full recipe"><h3>Ingredients</h3><ul class="sheet-ingredients">${ingredients.map((item) => `<li><span class="sheet-amount">${esc(item.amount)}</span><span>${esc(item.name)}</span></li>`).join("")}</ul><h3>Method</h3><ol class="sheet-steps">${steps.map((text, index) => `<li class="${inSteps && index === state.step ? "current" : inSteps && index < state.step ? "done" : ""}">${esc(text)}</li>`).join("")}</ol><div class="safety-note">Cooking with heat, knives, or raw ingredients? Ask a grown-up to help.</div></aside>`;
+      app.innerHTML = `${progressBar}<div class="screen-heading"><div><p class="eyebrow">Apron on, chef!</p><h1>${esc(recipe.name)}</h1><p>${servingsLabel} · ${esc(recipe.time)}</p></div><button class="secondary-button" data-action="leave">←&nbsp; Leave recipe</button></div><div class="cook-layout"><section class="cook-panel"><div class="cook-image" style="${recipeImage(recipe)}" role="img" aria-label="${esc(recipe.name)}"></div><div class="cook-body"><div class="stage-row"><span class="stage-label">${inSteps ? `STEP ${state.step + 1} OF ${steps.length}` : "GATHER INGREDIENTS"}</span></div>${activity}</div></section>${sheet}</div>`;
+      app.querySelector('[data-action="leave"]').addEventListener("click", () => { state.screen = "home"; render(); });
+      app.querySelectorAll("[data-ingredient]").forEach((box) => box.addEventListener("change", () => {
+        const index = Number(box.dataset.ingredient);
+        state.picked = box.checked ? [...state.picked, index] : state.picked.filter((item) => item !== index);
+        renderCook();
+        app.querySelector(`[data-ingredient="${index}"]`)?.focus();
+      }));
+      app.querySelector('[data-action="next"]')?.addEventListener("click", advance);
+      app.querySelector('[data-action="back"]')?.addEventListener("click", () => { if (state.step > 0) { state.step--; renderCook(); } });
+    }
+    function advance() {
+      const recipeData = buildRecipeDetails(currentRecipe());
+      if (state.stage === "ingredients") {
+        if (state.picked.length < recipeData.ingredients.length) return;
+        state.stage = recipeData.steps.length ? "steps" : "complete";
+      } else if (state.step < recipeData.steps.length - 1) state.step++;
+      else state.stage = "complete";
+      state.rewardGranted = false;
+      renderCook();
+    }
+    const substitutions = [
+      [/buttermilk/, "Buttermilk: stir 1 tablespoon lemon juice or white vinegar into 1 cup milk and let it stand 5 minutes."],
+      [/(?<!peanut )butter/, "Butter: in baking, use ¾ cup neutral oil for every 1 cup of butter, or replace up to half the butter with unsweetened applesauce. For pan-cooking or toast, olive or vegetable oil works in the same amount. Baked goods will be a little less rich."],
+      [/\begg/, "Egg (in muffins, cakes, pancakes): use ¼ cup unsweetened applesauce, or 1 mashed ripe banana, or 1 tablespoon ground flaxseed mixed with 3 tablespoons water (rest 5 minutes) for each egg. These do not work for omelets or scrambled eggs."],
+      [/milk/, "Milk: any unsweetened plant milk (soy or oat work best) swaps 1:1. In pancakes and muffins, water also works 1:1 but the result is less rich."],
+      [/baking powder/, "Baking powder: for 1 teaspoon, mix ¼ teaspoon baking soda with ½ teaspoon cream of tartar."],
+      [/brown sugar/, "Brown sugar: white sugar swaps 1:1, with a slightly less moist and less caramel-flavored result."],
+      [/honey/, "Honey: maple syrup swaps 1:1."],
+      [/sugar/, "Sugar: honey or maple syrup works at about ¾ cup for every 1 cup of sugar; cut the other liquid in the recipe slightly."],
+      [/flour/, "Flour: whole-wheat flour can replace up to half the all-purpose flour 1:1. For gluten-free baking, use a 1:1 gluten-free baking blend."],
+      [/sour cream|yogurt/, "Yogurt and sour cream swap for each other 1:1."],
+      [/bread ?crumb/, "Breadcrumbs: crushed crackers, crushed cornflakes, or rolled oats pulsed in a blender all work 1:1."],
+      [/cream/, "Heavy cream (for baking or soups, not for whipping): 1 cup milk plus 3 tablespoons melted butter."],
+      [/vanilla/, "Vanilla extract: use the same amount of maple syrup, or leave it out."],
+      [/lemon/, "Lemon juice: lime juice swaps 1:1, or use half the amount of white vinegar."],
+      [/oil/, "Oil: melted butter swaps 1:1, or replace part of the oil with unsweetened applesauce in baking."],
+      [/ground beef|beef/, "Ground beef: cooked brown lentils or black beans swap 1:1 by volume in tacos and sloppy joes."],
+      [/chicken/, "Chicken: firm tofu, chickpeas, or white beans work in most stir-fries and wraps."]
+    ];
+    const techniques = [
+      { match: /fluffy|pancake tips/, title: "Fluffy pancakes", recipe: "Pancakes", steps: ["Whisk the dry ingredients first so the baking powder is spread evenly.", "Stir wet into dry just until combined. Small lumps are fine; overmixing makes pancakes tough.", "Rest the batter for 5 minutes so the flour absorbs the liquid.", "Cook on medium heat, not high. Flip once, when bubbles form and the edges look set.", "Do not press the pancake after flipping; that squashes out the air."] },
+      { match: /chop|dice|knife/, title: "Chopping safely", steps: ["Ask a grown-up to supervise. A sharp knife slips less than a dull one.", "Put a damp towel under the cutting board so it cannot slide.", "Slice a thin piece off round foods to make a flat side, then lay it flat.", "Curl your guiding hand into a claw: fingertips tucked back, knuckles against the knife.", "Cut slowly and keep the tip of the knife on the board."] },
+      { match: /(boil|cook).*(pasta|noodle)/, title: "Cooking pasta", recipe: "Spaghetti", steps: ["Use a big pot with plenty of water so the pasta can move around.", "Once the water boils, add a generous pinch of salt, then the pasta. A grown-up should handle the hot pot.", "Stir in the first minute so it does not stick.", "Taste a piece 1–2 minutes before the package time; it should be tender with a slight bite.", "Scoop out a cup of pasta water before draining; a splash helps sauce cling."] },
+      { match: /whisk/, title: "Whisking", steps: ["Use a bowl big enough that nothing splashes out.", "Hold the bowl steady with a damp towel underneath.", "Move the whisk in quick circles, lifting a little to add air.", "Stop when the mixture looks even, with no streaks."] },
+      { match: /\bfold(ing)?\b/, title: "Folding", steps: ["Use a rubber spatula and add the lighter mixture on top of the heavier one.", "Cut down through the middle to the bottom of the bowl.", "Sweep along the bottom and lift up and over the top.", "Turn the bowl a quarter turn and repeat just until no streaks remain. Gentle folding keeps the air in."] },
+      { match: /simmer/, title: "Simmering", steps: ["Bring the liquid to a boil first.", "Lower the heat until only small bubbles rise gently to the surface.", "Keep the pot partly covered if the recipe says so, and stir now and then.", "If it boils hard again, turn the heat down."] },
+      { match: /saut/, title: "Sautéing", steps: ["Heat the pan on medium before adding a little oil.", "Cut the food into similar-sized pieces so it cooks evenly.", "Add the food in a single layer; too much at once steams it instead of browning.", "Stir or toss now and then until tender and lightly browned. A grown-up should handle the stove."] },
+      { match: /melt.*chocolate|chocolate.*melt/, title: "Melting chocolate", steps: ["Chop the chocolate into small, even pieces.", "Heat in short 20–30 second bursts in the microwave, or in a bowl over barely simmering water, with a grown-up's help.", "Stir between bursts; chocolate keeps its shape until stirred.", "Stop when a few lumps remain and stir until smooth. Keep water away from the chocolate."] },
+      { match: /knead|dough/, title: "Kneading dough", steps: ["Dust the counter lightly with flour.", "Push the dough away from you with the heel of your hand.", "Fold it back over itself and give it a quarter turn.", "Repeat for about 8 minutes, until smooth and springy. Add flour only a pinch at a time."] }
+    ];
+    const vagueWords = new Set(["fresh", "cooked", "large", "small", "ripe", "optional", "ground", "plain", "whole", "sweet", "chopped", "sliced", "frozen", "mixed", "ready", "made", "can", "with", "make", "use", "the", "and", "for", "what", "how", "have", "want", "need", "some", "from", "using", "you", "any", "got", "cook", "something", "instead", "kind"]);
+    let vocabulary = null;
+    let chatLog = null;
+    function stem(word) { return word.replace(/oes$/, "o").replace(/ies$/, "y").replace(/([^s])s$/, "$1"); }
+    function wordsOf(text) { return text.toLowerCase().split(/[^a-z]+/).filter((word) => word.length >= 3).map(stem).filter((word) => !vagueWords.has(word)); }
+    function recipeWords(recipe) { return new Set([...wordsOf(recipe.name), ...buildRecipeDetails(recipe).ingredients.flatMap((item) => wordsOf(item.name))]); }
+    function chatCard(recipe) {
+      const items = buildRecipeDetails(recipe).ingredients;
+      const shown = items.slice(0, 5).map((item) => `<li>${esc(item.amount)} ${esc(item.name)}</li>`).join("");
+      const more = items.length > 5 ? `<li>+ ${items.length - 5} more</li>` : "";
+      const action = unlocked(recipe) ? `<button class="primary-button" data-chef-cook="${esc(recipe.id)}">Start cooking</button>` : `<p class="chef-note">Locked: earn ${recipe.unlock} stars to cook this.</p>`;
+      return `<article class="chat-card">${heartButton(recipe)}<div class="recipe-card-photo" style="${recipeImage(recipe)}" role="img" aria-label="${esc(recipe.name)}"></div><div class="chat-card-body"><h4>${esc(recipe.name)}</h4><ul>${shown}${more}</ul>${action}</div></article>`;
+    }
+    function findNamedRecipe(query) {
+      const named = recipes.filter((recipe) => query.includes(recipe.name.toLowerCase().replace(/^homemade /, "")));
+      if (!named.length) return null;
+      const longest = Math.max(...named.map((recipe) => recipe.name.length));
+      const best = named.filter((recipe) => recipe.name.length === longest);
+      return best.find(unlocked) || best[0];
+    }
+    function chefReply(text) {
+      const query = text.toLowerCase().replace(/\band\b/g, "&").replace(/\s+/g, " ");
+      const named = findNamedRecipe(query);
+      if (/cook .*(together|with me)|guide me|walk me through|let'?s cook|start cooking/.test(query)) {
+        const target = named || recipes.find((recipe) => recipe.id === state.recipeId);
+        if (!target) return { text: "Tell me which recipe to cook, like \"Cook pancakes with me\".", cards: [] };
+        return { text: unlocked(target) ? `Great choice! Press Start cooking and I'll walk you through ${target.name}: first the ingredients and amounts, then each step one at a time.` : `${target.name} is still locked. Cook easier recipes to earn ${target.unlock} stars first.`, cards: [target.id] };
+      }
+      if (/instead of|substitut|replace|swap|out of|without|(don'?t|do not) have|no more/.test(query)) {
+        const hit = substitutions.find(([pattern]) => pattern.test(query));
+        if (hit) return { text: hit[1], cards: [] };
+        return { text: "I know swaps for butter, eggs, milk, buttermilk, sugar, honey, flour, baking powder, yogurt, cream, vanilla, lemon, oil, breadcrumbs, beef and chicken. Which one do you need?", cards: [] };
+      }
+      const technique = techniques.find((item) => item.match.test(query));
+      if (technique) {
+        const recipe = technique.recipe ? recipes.find((item) => item.name === technique.recipe) : null;
+        return { text: `${technique.title}, step by step:\n${technique.steps.map((step, index) => `${index + 1}. ${step}`).join("\n")}`, cards: recipe ? [recipe.id] : [] };
+      }
+      if (/surprise|random|something new|what should i (make|cook)|dealer/.test(query)) {
+        const open = recipes.filter(unlocked);
+        const fresh = open.filter((recipe) => !state.completed.includes(recipe.id));
+        const pool = fresh.length ? fresh : open;
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        return { text: `How about ${pick.name}? It takes about ${pick.time}.`, cards: [pick.id] };
+      }
+      if (named) {
+        const details = buildRecipeDetails(named);
+        return { text: `Here is ${named.name}. It takes about ${named.time} and needs ${details.ingredients.length} ingredients. Start cooking and I will show every amount and each of the ${details.steps.length} steps.`, cards: [named.id] };
+      }
+      if (!vocabulary) vocabulary = new Set(recipes.flatMap((recipe) => [...recipeWords(recipe)]));
+      const wanted = [...new Set(wordsOf(query).filter((word) => vocabulary.has(word)))];
+      if (wanted.length) {
+        const ranked = recipes.filter(unlocked).map((recipe) => { const words = recipeWords(recipe); return { recipe, hits: wanted.filter((word) => words.has(word)).length }; }).filter((item) => item.hits).sort((a, b) => b.hits - a.hits || buildRecipeDetails(a.recipe).ingredients.length - buildRecipeDetails(b.recipe).ingredients.length).slice(0, 3);
+        if (ranked.length) return { text: `With ${wanted.join(" and ")} you could make:`, cards: ranked.map((item) => item.recipe.id) };
+        return { text: `I could not find an unlocked recipe that uses ${wanted.join(" or ")}. Try other ingredients or ask for a surprise.`, cards: [] };
+      }
+      return { text: "I can find recipes from ingredients, suggest a surprise, explain a technique, or suggest an ingredient swap. Try one of the questions below.", cards: [] };
+    }
+    function askChef(text) {
+      const question = text.trim();
+      if (!question) return;
+      chatLog.push({ from: "you", text: question });
+      const reply = chefReply(question);
+      chatLog.push({ from: "chef", text: reply.text, cards: reply.cards });
+      renderChef();
+      const log = app.querySelector("#chat-log");
+      log.scrollTop = log.scrollHeight;
+      app.querySelector("#chat-input").focus();
+    }
+    function renderChef() {
+      if (!chatLog) chatLog = [{ from: "chef", text: "Hi, I'm Chef Ladle! Ask me what to make, how to cook something, or what to use instead of an ingredient." }];
+      const suggestions = ["What can I make with strawberries and bananas?", "How do I make fluffy pancakes?", "What can I use instead of butter?", "Teach me to chop safely", "Surprise me!", "Cook pancakes with me"];
+      const messages = chatLog.map((message) => `<div class="bubble ${message.from}">${esc(message.text)}</div>${message.cards && message.cards.length ? `<div class="chat-cards">${message.cards.map((id) => recipes.find((recipe) => recipe.id === id)).filter(Boolean).map(chatCard).join("")}</div>` : ""}`).join("");
+      app.innerHTML = `<div class="screen-heading"><div><p class="eyebrow">Your cooking buddy</p><h1>Chef AI</h1><p>Ask for recipes, swaps, and cooking help.</p></div></div><div class="chef-wrap"><div class="chef-head"><div class="chef-face" aria-hidden="true">👩‍🍳</div><div><strong>Chef Ladle</strong><p class="chef-note">Answers come from Little Ladle's own recipes and tips, not a live AI model.</p></div></div><div class="chat-log" id="chat-log" role="log" aria-live="polite">${messages}</div><div class="chip-row">${suggestions.map((question) => `<button class="chip" data-ask="${esc(question)}">${esc(question)}</button>`).join("")}</div><form class="chat-form" id="chat-form"><label class="sr-only" for="chat-input">Ask Chef Ladle</label><input id="chat-input" autocomplete="off" maxlength="200" placeholder="Ask about recipes, swaps, or techniques"><button class="primary-button" type="submit">Send</button></form></div>`;
+      app.querySelectorAll("[data-ask]").forEach((chip) => chip.addEventListener("click", () => askChef(chip.dataset.ask)));
+      bindHearts(() => { const top = app.querySelector("#chat-log").scrollTop; renderChef(); app.querySelector("#chat-log").scrollTop = top; });
+      app.querySelectorAll("[data-chef-cook]").forEach((button) => button.addEventListener("click", () => startRecipe(button.dataset.chefCook)));
+      app.querySelector("#chat-form").addEventListener("submit", (event) => { event.preventDefault(); const input = app.querySelector("#chat-input"); const value = input.value; input.value = ""; askChef(value); });
+    }
+    function startRecipe(id) {
+      state.recipeId = id;
+      state.screen = "cook";
+      state.stage = "ingredients";
+      state.picked = [];
+      state.step = 0;
+      state.answered = false;
+      state.feedback = "";
+      state.firstTry = true;
+      state.rewardGranted = false;
+      render();
+    }
+    function render() {
+      document.querySelectorAll(".nav-button").forEach((button) => {
+        if (button.dataset.screen === state.screen) button.setAttribute("aria-current", "page");
+        else button.removeAttribute("aria-current");
+      });
+      document.querySelector("#breadcrumb").innerHTML = state.screen === "profile" ? "Your kitchen <span aria-hidden=\"true\">/</span> My chef profile" : state.screen === "chef" ? "Your kitchen <span aria-hidden=\"true\">/</span> Chef AI" : state.screen === "book" ? "Your kitchen <span aria-hidden=\"true\">/</span> Recipe book" : state.screen === "settings" ? "Your kitchen <span aria-hidden=\"true\">/</span> Settings" : state.screen === "cook" ? "Your kitchen <span aria-hidden=\"true\">/</span> Cooking" : "Your kitchen <span aria-hidden=\"true\">/</span> Today";
+      updateProgress();
+      applyPreferences();
+      if (state.screen === "book") renderBook();
+      else if (state.screen === "settings") renderSettings();
+      else if (state.screen === "chef") renderChef();
+      else if (state.screen === "profile") renderProfile();
+      else if (state.screen === "cook") renderCook();
+      else renderHome();
+    }
+    document.querySelectorAll(".nav-button").forEach((button) => button.addEventListener("click", () => { state.screen = button.dataset.screen; render(); }));
+    document.querySelector("#streak-chip").addEventListener("click", () => { state.screen = "profile"; render(); });
+    render();
+  </script>
+</body>
+</html>
